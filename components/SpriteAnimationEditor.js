@@ -146,6 +146,12 @@ const SpriteAnimationEditor = () => {
         URL.revokeObjectURL(url);
     };
 
+    const fileInputRef = useRef(null);
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
     const loadProject = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -198,16 +204,19 @@ const SpriteAnimationEditor = () => {
         const animate = (currentTime) => {
             if (currentTime - lastFrameTime >= frameDuration) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const frame = animations[currentAnimation][frameIndex];
-                frame.grid.forEach((row, y) => {
-                    row.forEach((cell, x) => {
-                        if (cell) {
-                            ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
-                            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                        }
+                const currentAnimationFrames = animations[currentAnimation];
+                if (currentAnimationFrames && currentAnimationFrames.length > 0) {
+                    const frame = currentAnimationFrames[frameIndex];
+                    frame.grid.forEach((row, y) => {
+                        row.forEach((cell, x) => {
+                            if (cell) {
+                                ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
+                                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                            }
+                        });
                     });
-                });
-                frameIndex = (frameIndex + 1) % animations[currentAnimation].length;
+                    frameIndex = (frameIndex + 1) % animations[currentAnimation].length;
+                }
                 lastFrameTime = currentTime;
             }
             if (isPlaying) {
@@ -222,15 +231,18 @@ const SpriteAnimationEditor = () => {
                 cancelAnimationFrame(animationRef.current);
             }
             // Render the current frame when stopped
-            const frame = animations[currentAnimation][currentFrame];
-            frame.grid.forEach((row, y) => {
-                row.forEach((cell, x) => {
-                    if (cell) {
-                        ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
-                        ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                    }
+            const currentAnimationFrames = animations[currentAnimation];
+            if (currentAnimationFrames && currentAnimationFrames.length > 0) {
+                const frame = currentAnimationFrames[currentFrame];
+                frame.grid.forEach((row, y) => {
+                    row.forEach((cell, x) => {
+                        if (cell) {
+                            ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
+                            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                        }
+                    });
                 });
-            });
+            }
         }
 
         return () => {
@@ -256,33 +268,35 @@ const SpriteAnimationEditor = () => {
             </div>
             <div className="flex mb-4">
                 <div className="mr-2">
-                    {animations[currentAnimation][currentFrame].lineColors.map((color, index) => (
-                        <div
-                            key={index}
-                            className="w-8 h-6 border border-gray-300 cursor-pointer mb-[1px]"
-                            style={{ backgroundColor: color !== undefined ? COLORS[color].hex : 'transparent' }}
-                            onClick={() => handleLineColorChange(index)}
-                            title={color !== undefined ? COLORS[color].name : 'No color'}
-                        />
-                    ))}
+                    {animations[currentAnimation] && animations[currentAnimation][currentFrame] &&
+                        animations[currentAnimation][currentFrame].lineColors.map((color, index) => (
+                            <div
+                                key={index}
+                                className="w-8 h-6 border border-gray-300 cursor-pointer mb-[1px]"
+                                style={{ backgroundColor: color !== undefined ? COLORS[color].hex : 'transparent' }}
+                                onClick={() => handleLineColorChange(index)}
+                                title={color !== undefined ? COLORS[color].name : 'No color'}
+                            />
+                        ))}
                 </div>
                 <div className="border border-gray-300 inline-block bg-white">
-                    {animations[currentAnimation][currentFrame].grid.map((row, rowIndex) => (
-                        <div key={rowIndex} className="flex">
-                            {row.map((cell, colIndex) => (
-                                <div
-                                    key={`${rowIndex}-${colIndex}`}
-                                    className="w-8 h-6 border border-gray-200 cursor-pointer"
-                                    style={{
-                                        backgroundColor: cell && animations[currentAnimation][currentFrame].lineColors[rowIndex] !== undefined ?
-                                            COLORS[animations[currentAnimation][currentFrame].lineColors[rowIndex]].hex : 'transparent',
-                                        opacity: cell ? 1 : 0.3
-                                    }}
-                                    onClick={() => handleCellClick(rowIndex, colIndex)}
-                                />
-                            ))}
-                        </div>
-                    ))}
+                    {animations[currentAnimation] && animations[currentAnimation][currentFrame] &&
+                        animations[currentAnimation][currentFrame].grid.map((row, rowIndex) => (
+                            <div key={rowIndex} className="flex">
+                                {row.map((cell, colIndex) => (
+                                    <div
+                                        key={`${rowIndex}-${colIndex}`}
+                                        className="w-8 h-6 border border-gray-200 cursor-pointer"
+                                        style={{
+                                            backgroundColor: cell && animations[currentAnimation][currentFrame].lineColors[rowIndex] !== undefined ?
+                                                COLORS[animations[currentAnimation][currentFrame].lineColors[rowIndex]].hex : 'transparent',
+                                            opacity: cell ? 1 : 0.3
+                                        }}
+                                        onClick={() => handleCellClick(rowIndex, colIndex)}
+                                    />
+                                ))}
+                            </div>
+                        ))}
                 </div>
                 <div className="ml-4">
                     <h2 className="text-lg font-bold mb-2">Preview</h2>
@@ -318,7 +332,7 @@ const SpriteAnimationEditor = () => {
                 <Button onClick={copyFrame}>Copy Frame</Button>
                 <Button onClick={pasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
                 <span className="ml-4">
-                    Frame: {currentFrame + 1} of {animations[currentAnimation].length}
+                    Frame: {currentFrame + 1} of {animations[currentAnimation] ? animations[currentAnimation].length : 0}
                 </span>
                 <Button onClick={() => setCurrentFrame(Math.max(0, currentFrame - 1))} disabled={currentFrame === 0}>Previous</Button>
                 <Button onClick={() => setCurrentFrame(Math.min(animations[currentAnimation].length - 1, currentFrame + 1))} disabled={currentFrame === animations[currentAnimation].length - 1}>Next</Button>
@@ -349,11 +363,9 @@ const SpriteAnimationEditor = () => {
                     accept=".json"
                     onChange={loadProject}
                     style={{ display: 'none' }}
-                    id="load-project"
+                    ref={fileInputRef}
                 />
-                <label htmlFor="load-project">
-                    <Button as="span">Load Project</Button>
-                </label>
+                <Button onClick={triggerFileInput}>Load Project</Button>
             </div>
         </div>
     );
