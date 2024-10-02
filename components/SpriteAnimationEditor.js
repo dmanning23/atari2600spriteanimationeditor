@@ -31,6 +31,7 @@ const COLORS = [
 ];
 
 const SpriteAnimationEditor = () => {
+    const [characterName, setCharacterName] = useState('');
     const [animations, setAnimations] = useState({
         'Default': [{
             grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
@@ -133,6 +134,7 @@ const SpriteAnimationEditor = () => {
 
     const saveProject = () => {
         const projectData = {
+            characterName: characterName,
             animations: animations,
             animationSpeed: animationSpeed
         };
@@ -141,7 +143,7 @@ const SpriteAnimationEditor = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'sprite_project.json';
+        link.download = `${characterName || 'sprite'}_project.json`;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -165,6 +167,9 @@ const SpriteAnimationEditor = () => {
                         setCurrentFrame(0);
                         if (typeof loadedProject.animationSpeed === 'number') {
                             setAnimationSpeed(loadedProject.animationSpeed);
+                        }
+                        if (typeof loadedProject.characterName === 'string') {
+                            setCharacterName(loadedProject.characterName);
                         }
                     } else {
                         alert('Invalid file format');
@@ -255,6 +260,19 @@ const SpriteAnimationEditor = () => {
     return (
         <div className="p-4 bg-gray-100">
             <h1 className="text-2xl font-bold mb-4">Atari 2600 Sprite Animation Editor</h1>
+
+            <div className="mb-4">
+                <label htmlFor="character-name" className="block text-sm font-medium text-gray-700">Character Name</label>
+                <Input
+                    id="character-name"
+                    type="text"
+                    value={characterName}
+                    onChange={(e) => setCharacterName(e.target.value)}
+                    placeholder="Enter character name"
+                    className="mt-1"
+                />
+            </div>
+
             <div className="mb-4 grid grid-cols-8 gap-2">
                 {COLORS.map((color, index) => (
                     <Button
