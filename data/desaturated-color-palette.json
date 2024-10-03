@@ -1,0 +1,516 @@
+{
+    "palette": [
+        {
+            "code": "$00",
+            "color": "#000000"
+        },
+        {
+            "code": "$02",
+            "color": "#1A1A1A"
+        },
+        {
+            "code": "$04",
+            "color": "#393939"
+        },
+        {
+            "code": "$06",
+            "color": "#5B5B5B"
+        },
+        {
+            "code": "$08",
+            "color": "#7E7E7E"
+        },
+        {
+            "code": "$0A",
+            "color": "#A2A2A2"
+        },
+        {
+            "code": "$0C",
+            "color": "#C7C7C7"
+        },
+        {
+            "code": "$0E",
+            "color": "#EDEDED"
+        },
+        {
+            "code": "$10",
+            "color": "#130400"
+        },
+        {
+            "code": "$12",
+            "color": "#322000"
+        },
+        {
+            "code": "$14",
+            "color": "#534000"
+        },
+        {
+            "code": "$16",
+            "color": "#756200"
+        },
+        {
+            "code": "$18",
+            "color": "#998513"
+        },
+        {
+            "code": "$1A",
+            "color": "#BEA932"
+        },
+        {
+            "code": "$1C",
+            "color": "#E4CF53"
+        },
+        {
+            "code": "$1E",
+            "color": "#FEF578"
+        },
+        {
+            "code": "$20",
+            "color": "#270000"
+        },
+        {
+            "code": "$22",
+            "color": "#481100"
+        },
+        {
+            "code": "$24",
+            "color": "#6A2F00"
+        },
+        {
+            "code": "$26",
+            "color": "#8D5007"
+        },
+        {
+            "code": "$28",
+            "color": "#B27223"
+        },
+        {
+            "code": "$2A",
+            "color": "#D79643"
+        },
+        {
+            "code": "$2C",
+            "color": "#FEBB65"
+        },
+        {
+            "code": "$2E",
+            "color": "#FEE093"
+        },
+        {
+            "code": "$30",
+            "color": "#340000"
+        },
+        {
+            "code": "$32",
+            "color": "#550500"
+        },
+        {
+            "code": "$34",
+            "color": "#772109"
+        },
+        {
+            "code": "$36",
+            "color": "#9B4126"
+        },
+        {
+            "code": "$38",
+            "color": "#C06346"
+        },
+        {
+            "code": "$3A",
+            "color": "#E68668"
+        },
+        {
+            "code": "$3C",
+            "color": "#FEAA8E"
+        },
+        {
+            "code": "$3E",
+            "color": "#FED0BE"
+        },
+        {
+            "code": "$40",
+            "color": "#340002"
+        },
+        {
+            "code": "$42",
+            "color": "#560014"
+        },
+        {
+            "code": "$44",
+            "color": "#781832"
+        },
+        {
+            "code": "$46",
+            "color": "#9C3753"
+        },
+        {
+            "code": "$48",
+            "color": "#C15975"
+        },
+        {
+            "code": "$4A",
+            "color": "#E77B99"
+        },
+        {
+            "code": "$4C",
+            "color": "#FEA0C2"
+        },
+        {
+            "code": "$4E",
+            "color": "#FEC5EE"
+        },
+        {
+            "code": "$50",
+            "color": "#29002B"
+        },
+        {
+            "code": "$52",
+            "color": "#4A0041"
+        },
+        {
+            "code": "$54",
+            "color": "#6C1662"
+        },
+        {
+            "code": "$56",
+            "color": "#8F3485"
+        },
+        {
+            "code": "$58",
+            "color": "#B456A9"
+        },
+        {
+            "code": "$5A",
+            "color": "#DA78CF"
+        },
+        {
+            "code": "$5C",
+            "color": "#FE9CE2"
+        },
+        {
+            "code": "$5E",
+            "color": "#FEC1ED"
+        },
+        {
+            "code": "$60",
+            "color": "#160051"
+        },
+        {
+            "code": "$62",
+            "color": "#350069"
+        },
+        {
+            "code": "$64",
+            "color": "#57198B"
+        },
+        {
+            "code": "$66",
+            "color": "#7938B0"
+        },
+        {
+            "code": "$68",
+            "color": "#9D5AD5"
+        },
+        {
+            "code": "$6A",
+            "color": "#C27DE9"
+        },
+        {
+            "code": "$6C",
+            "color": "#E7A1EA"
+        },
+        {
+            "code": "$6E",
+            "color": "#FEC6EE"
+        },
+        {
+            "code": "$70",
+            "color": "#010066"
+        },
+        {
+            "code": "$72",
+            "color": "#1C0782"
+        },
+        {
+            "code": "$74",
+            "color": "#3B24A6"
+        },
+        {
+            "code": "$76",
+            "color": "#5D44CB"
+        },
+        {
+            "code": "$78",
+            "color": "#8066F1"
+        },
+        {
+            "code": "$7A",
+            "color": "#A489F7"
+        },
+        {
+            "code": "$7C",
+            "color": "#C9AEF7"
+        },
+        {
+            "code": "$7E",
+            "color": "#EFD3F7"
+        },
+        {
+            "code": "$80",
+            "color": "#00005D"
+        },
+        {
+            "code": "$82",
+            "color": "#051486"
+        },
+        {
+            "code": "$84",
+            "color": "#2133AA"
+        },
+        {
+            "code": "$86",
+            "color": "#4154D0"
+        },
+        {
+            "code": "$88",
+            "color": "#6376F6"
+        },
+        {
+            "code": "$8A",
+            "color": "#869AFE"
+        },
+        {
+            "code": "$8C",
+            "color": "#AABFFE"
+        },
+        {
+            "code": "$8E",
+            "color": "#D0E5FE"
+        },
+        {
+            "code": "$90",
+            "color": "#000742"
+        },
+        {
+            "code": "$92",
+            "color": "#00236E"
+        },
+        {
+            "code": "$94",
+            "color": "#0D4397"
+        },
+        {
+            "code": "$96",
+            "color": "#2B65BC"
+        },
+        {
+            "code": "$98",
+            "color": "#4C88E2"
+        },
+        {
+            "code": "$9A",
+            "color": "#6EADFE"
+        },
+        {
+            "code": "$9C",
+            "color": "#92D2FE"
+        },
+        {
+            "code": "$9E",
+            "color": "#B6F8FE"
+        },
+        {
+            "code": "$A0",
+            "color": "#000E17"
+        },
+        {
+            "code": "$A2",
+            "color": "#003247"
+        },
+        {
+            "code": "$A4",
+            "color": "#045371"
+        },
+        {
+            "code": "$A6",
+            "color": "#1F7595"
+        },
+        {
+            "code": "$A8",
+            "color": "#3F99BA"
+        },
+        {
+            "code": "$AA",
+            "color": "#61BEDF"
+        },
+        {
+            "code": "$AC",
+            "color": "#84E4FE"
+        },
+        {
+            "code": "$AE",
+            "color": "#A8FEFE"
+        },
+        {
+            "code": "$B0",
+            "color": "#001C07"
+        },
+        {
+            "code": "$B2",
+            "color": "#003B1A"
+        },
+        {
+            "code": "$B4",
+            "color": "#035D42"
+        },
+        {
+            "code": "$B6",
+            "color": "#1E8064"
+        },
+        {
+            "code": "$B8",
+            "color": "#3EA487"
+        },
+        {
+            "code": "$BA",
+            "color": "#60C9AB"
+        },
+        {
+            "code": "$BC",
+            "color": "#83EFD1"
+        },
+        {
+            "code": "$BE",
+            "color": "#A7FEF0"
+        },
+        {
+            "code": "$C0",
+            "color": "#001E08"
+        },
+        {
+            "code": "$C2",
+            "color": "#003E10"
+        },
+        {
+            "code": "$C4",
+            "color": "#0B6014"
+        },
+        {
+            "code": "$C6",
+            "color": "#288333"
+        },
+        {
+            "code": "$C8",
+            "color": "#49A754"
+        },
+        {
+            "code": "$CA",
+            "color": "#6BCC76"
+        },
+        {
+            "code": "$CC",
+            "color": "#8EF29A"
+        },
+        {
+            "code": "$CE",
+            "color": "#B3FEB9"
+        },
+        {
+            "code": "$D0",
+            "color": "#001B07"
+        },
+        {
+            "code": "$D2",
+            "color": "#023A0D"
+        },
+        {
+            "code": "$D4",
+            "color": "#1E5C0D"
+        },
+        {
+            "code": "$D6",
+            "color": "#3D7F0E"
+        },
+        {
+            "code": "$D8",
+            "color": "#5FA32C"
+        },
+        {
+            "code": "$DA",
+            "color": "#82C84D"
+        },
+        {
+            "code": "$DC",
+            "color": "#A6EE6F"
+        },
+        {
+            "code": "$DE",
+            "color": "#CBFE8D"
+        },
+        {
+            "code": "$E0",
+            "color": "#001104"
+        },
+        {
+            "code": "$E2",
+            "color": "#182F05"
+        },
+        {
+            "code": "$E4",
+            "color": "#365005"
+        },
+        {
+            "code": "$E6",
+            "color": "#587205"
+        },
+        {
+            "code": "$E8",
+            "color": "#7A9617"
+        },
+        {
+            "code": "$EA",
+            "color": "#9EBB35"
+        },
+        {
+            "code": "$EC",
+            "color": "#C3E057"
+        },
+        {
+            "code": "$EE",
+            "color": "#E9FE77"
+        },
+        {
+            "code": "$F0",
+            "color": "#120400"
+        },
+        {
+            "code": "$F2",
+            "color": "#312000"
+        },
+        {
+            "code": "$F4",
+            "color": "#524000"
+        },
+        {
+            "code": "$F6",
+            "color": "#746200"
+        },
+        {
+            "code": "$F8",
+            "color": "#988513"
+        },
+        {
+            "code": "$FA",
+            "color": "#BDA932"
+        },
+        {
+            "code": "$FC",
+            "color": "#E3CF53"
+        },
+        {
+            "code": "$FE",
+            "color": "#FEF577"
+        }
+    ]
+}

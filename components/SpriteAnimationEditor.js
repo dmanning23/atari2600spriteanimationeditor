@@ -5,42 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import ColorPalette from '@/components/ColorPalette';
+import colorPaletteData from '@/data/desaturated-color-palette.json';
 
 const GRID_WIDTH = 8;
 const GRID_HEIGHT = 16;
 const PIXEL_ASPECT_RATIO = 1.33; // Horizontal to vertical ratio for Atari 2600 pixels
 const ATARI_REFRESH_RATE = 60; // 60 Hz
 
-const COLORS = [
-    { name: 'Black', hex: '#000000' },
-    { name: 'White', hex: '#FFFFFF' },
-    { name: 'Grey', hex: '#7C7C7C' },
-    { name: 'Yellow', hex: '#BCBC00' },
-    { name: 'Orange', hex: '#AC7C00' },
-    { name: 'Red-Orange', hex: '#AC5400' },
-    { name: 'Brown', hex: '#843800' },
-    { name: 'Red', hex: '#AC0000' },
-    { name: 'Dark Green', hex: '#005400' },
-    { name: 'Green', hex: '#0C5C00' },
-    { name: 'Blue-Green', hex: '#006C00' },
-    { name: 'Blue', hex: '#00388C' },
-    { name: 'Light Blue', hex: '#0070EC' },
-    { name: 'Blue-Violet', hex: '#2C0084' },
-    { name: 'Violet', hex: '#8C00AC' },
-    { name: 'Purple', hex: '#AC00AC' },
-];
-
 const SpriteAnimationEditor = () => {
     const [characterName, setCharacterName] = useState('');
     const [animations, setAnimations] = useState({
         'Default': [{
             grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-            lineColors: Array(GRID_HEIGHT).fill(0)
+            lineColors: Array(GRID_HEIGHT).fill('$00') // Use Atari color codes
         }]
     });
     const [currentAnimation, setCurrentAnimation] = useState('Default');
     const [currentFrame, setCurrentFrame] = useState(0);
-    const [currentColor, setCurrentColor] = useState(1);
+    const [currentColor, setCurrentColor] = useState('$0E'); // Default to white
     const [copiedFrame, setCopiedFrame] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [newAnimationName, setNewAnimationName] = useState('');
@@ -192,6 +175,11 @@ const SpriteAnimationEditor = () => {
         setIsPlaying(false);  // Stop the animation when switching
     };
 
+    const getColorHex = (code) => {
+        const colorObj = colorPaletteData.palette.find(c => c.code === code);
+        return colorObj ? colorObj.color : 'transparent';
+    };
+
     useEffect(() => {
         if (!canvasRef.current) return;
 
@@ -215,7 +203,8 @@ const SpriteAnimationEditor = () => {
                     frame.grid.forEach((row, y) => {
                         row.forEach((cell, x) => {
                             if (cell) {
-                                ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
+                                const colorCode = frame.lineColors[y];
+                                ctx.fillStyle = getColorHex(colorCode);
                                 ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                             }
                         });
@@ -242,7 +231,7 @@ const SpriteAnimationEditor = () => {
                 frame.grid.forEach((row, y) => {
                     row.forEach((cell, x) => {
                         if (cell) {
-                            ctx.fillStyle = COLORS[frame.lineColors[y]].hex;
+                            ctx.fillStyle = getColorHex(frame.lineColors[y]);
                             ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                         }
                     });
@@ -273,17 +262,18 @@ const SpriteAnimationEditor = () => {
                 />
             </div>
 
-            <div className="mb-4 grid grid-cols-8 gap-2">
-                {COLORS.map((color, index) => (
-                    <Button
-                        key={color.name}
-                        className={`w-12 h-9 ${currentColor === index ? 'ring-2 ring-offset-2 ring-black' : ''}`}
-                        style={{ backgroundColor: color.hex }}
-                        onClick={() => setCurrentColor(index)}
-                        title={color.name}
-                    />
-                ))}
+            <div className="flex items-center space-x-2 mb-4">
+                <Button onClick={saveProject}>Save Project</Button>
+                <input
+                    type="file"
+                    accept=".json"
+                    onChange={loadProject}
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
+                />
+                <Button onClick={triggerFileInput}>Load Project</Button>
             </div>
+
             <div className="flex mb-4">
                 <div className="mr-2">
                     {animations[currentAnimation] && animations[currentAnimation][currentFrame] &&
@@ -291,9 +281,9 @@ const SpriteAnimationEditor = () => {
                             <div
                                 key={index}
                                 className="w-8 h-6 border border-gray-300 cursor-pointer mb-[1px]"
-                                style={{ backgroundColor: color !== undefined ? COLORS[color].hex : 'transparent' }}
+                                style={{ backgroundColor: color !== undefined ? getColorHex(color) : 'transparent' }}
                                 onClick={() => handleLineColorChange(index)}
-                                title={color !== undefined ? COLORS[color].name : 'No color'}
+                                title={color !== undefined ? getColorHex(color) : 'No color'}
                             />
                         ))}
                 </div>
@@ -306,8 +296,7 @@ const SpriteAnimationEditor = () => {
                                         key={`${rowIndex}-${colIndex}`}
                                         className="w-8 h-6 border border-gray-200 cursor-pointer"
                                         style={{
-                                            backgroundColor: cell && animations[currentAnimation][currentFrame].lineColors[rowIndex] !== undefined ?
-                                                COLORS[animations[currentAnimation][currentFrame].lineColors[rowIndex]].hex : 'transparent',
+                                            backgroundColor: cell ? getColorHex(animations[currentAnimation][currentFrame].lineColors[rowIndex]) : 'transparent',
                                             opacity: cell ? 1 : 0.3
                                         }}
                                         onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -322,6 +311,9 @@ const SpriteAnimationEditor = () => {
                     <Button className="mt-2" onClick={toggleAnimation}>
                         {isPlaying ? 'Stop' : 'Play'} Animation
                     </Button>
+                </div>
+                <div className="ml-4">
+                    <ColorPalette onColorSelect={setCurrentColor} currentColor={currentColor} />
                 </div>
             </div>
             <div className="flex items-center space-x-2 mb-4">
@@ -373,17 +365,6 @@ const SpriteAnimationEditor = () => {
                     onChange={(e) => setAnimationSpeed(Number(e.target.value))}
                     className="w-16"
                 />
-            </div>
-            <div className="flex items-center space-x-2">
-                <Button onClick={saveProject}>Save Project</Button>
-                <input
-                    type="file"
-                    accept=".json"
-                    onChange={loadProject}
-                    style={{ display: 'none' }}
-                    ref={fileInputRef}
-                />
-                <Button onClick={triggerFileInput}>Load Project</Button>
             </div>
         </div>
     );
