@@ -30,7 +30,6 @@ const SpriteAnimationEditor = () => {
     const [copiedFrame, setCopiedFrame] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [newAnimationName, setNewAnimationName] = useState('');
-    const [animationSpeed, setAnimationSpeed] = useState(30); // Default to 0.5 seconds between frames
     const canvasRef = useRef(null);
     const animationRef = useRef(null);
 
@@ -262,7 +261,7 @@ const SpriteAnimationEditor = () => {
                 cancelAnimationFrame(animationRef.current);
             }
         };
-    }, [isPlaying, animations, currentAnimation, animationSpeed, currentFrame]);
+    }, [isPlaying, animations, currentAnimation, currentFrame]);
 
     return (
         <div className="p-4 bg-gray-100">
