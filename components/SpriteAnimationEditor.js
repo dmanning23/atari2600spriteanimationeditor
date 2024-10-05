@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ColorPalette from '@/components/ColorPalette';
 import AnimationSpeedControl from '@/components/AnimationSpeedControl';
 import colorPaletteData from '@/data/desaturated-color-palette.json';
+import Atari2600CodeExporter from '@/components/Atari2600CodeExporter';
 
 const GRID_WIDTH = 8;
 const GRID_HEIGHT = 16;
@@ -368,6 +369,7 @@ const SpriteAnimationEditor = () => {
                 speed={animations[currentAnimation].speed}
                 onChange={handleSpeedChange}
             />
+            <Atari2600CodeExporter animations={animations} characterName={characterName} />
         </div>
     );
 };
