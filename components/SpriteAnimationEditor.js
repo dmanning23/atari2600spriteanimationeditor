@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import ColorPalette from '@/components/ColorPalette';
+import AnimationSpeedControl from '@/components/AnimationSpeedControl';
 import colorPaletteData from '@/data/desaturated-color-palette.json';
 
 const GRID_WIDTH = 8;
@@ -16,10 +16,13 @@ const ATARI_REFRESH_RATE = 60; // 60 Hz
 const SpriteAnimationEditor = () => {
     const [characterName, setCharacterName] = useState('');
     const [animations, setAnimations] = useState({
-        'Default': [{
-            grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-            lineColors: Array(GRID_HEIGHT).fill('$00') // Use Atari color codes
-        }]
+        'Default': {
+            frames: [{
+                grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
+                lineColors: Array(GRID_HEIGHT).fill('$00')
+            }],
+            speed: 30
+        }
     });
     const [currentAnimation, setCurrentAnimation] = useState('Default');
     const [currentFrame, setCurrentFrame] = useState(0);
@@ -33,7 +36,7 @@ const SpriteAnimationEditor = () => {
 
     const handleCellClick = (row, col) => {
         const newAnimations = { ...animations };
-        const frame = { ...newAnimations[currentAnimation][currentFrame] };
+        const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
         frame.grid = [...frame.grid];
         frame.grid[row] = [...frame.grid[row]];
         frame.grid[row][col] = !frame.grid[row][col];
@@ -43,49 +46,46 @@ const SpriteAnimationEditor = () => {
             frame.lineColors[row] = currentColor;
         }
 
-        newAnimations[currentAnimation][currentFrame] = frame;
+        newAnimations[currentAnimation].frames[currentFrame] = frame;
         setAnimations(newAnimations);
     };
 
     const handleLineColorChange = (row) => {
         const newAnimations = { ...animations };
-        const frame = { ...newAnimations[currentAnimation][currentFrame] };
+        const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
         frame.lineColors = [...frame.lineColors];
         frame.lineColors[row] = currentColor;
-        newAnimations[currentAnimation][currentFrame] = frame;
+        newAnimations[currentAnimation].frames[currentFrame] = frame;
         setAnimations(newAnimations);
     };
 
     const addFrame = () => {
         const newAnimations = { ...animations };
-        newAnimations[currentAnimation] = [
-            ...newAnimations[currentAnimation],
-            {
-                grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                lineColors: Array(GRID_HEIGHT).fill(0)
-            }
-        ];
+        newAnimations[currentAnimation].frames.push({
+            grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
+            lineColors: Array(GRID_HEIGHT).fill('$00')
+        });
         setAnimations(newAnimations);
-        setCurrentFrame(newAnimations[currentAnimation].length - 1);
+        setCurrentFrame(newAnimations[currentAnimation].frames.length - 1);
     };
 
     const deleteFrame = () => {
-        if (animations[currentAnimation].length > 1) {
+        if (animations[currentAnimation].frames.length > 1) {
             const newAnimations = { ...animations };
-            newAnimations[currentAnimation] = newAnimations[currentAnimation].filter((_, index) => index !== currentFrame);
+            newAnimations[currentAnimation].frames = newAnimations[currentAnimation].frames.filter((_, index) => index !== currentFrame);
             setAnimations(newAnimations);
-            setCurrentFrame(Math.min(currentFrame, newAnimations[currentAnimation].length - 1));
+            setCurrentFrame(Math.min(currentFrame, newAnimations[currentAnimation].frames.length - 1));
         }
     };
 
     const copyFrame = () => {
-        setCopiedFrame(JSON.parse(JSON.stringify(animations[currentAnimation][currentFrame])));
+        setCopiedFrame(JSON.parse(JSON.stringify(animations[currentAnimation].frames[currentFrame])));
     };
 
     const pasteFrame = () => {
         if (copiedFrame) {
             const newAnimations = { ...animations };
-            newAnimations[currentAnimation][currentFrame] = JSON.parse(JSON.stringify(copiedFrame));
+            newAnimations[currentAnimation].frames[currentFrame] = JSON.parse(JSON.stringify(copiedFrame));
             setAnimations(newAnimations);
         }
     };
@@ -94,10 +94,13 @@ const SpriteAnimationEditor = () => {
         if (newAnimationName && !animations[newAnimationName]) {
             setAnimations({
                 ...animations,
-                [newAnimationName]: [{
-                    grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                    lineColors: Array(GRID_HEIGHT).fill(0)
-                }]
+                [newAnimationName]: {
+                    frames: [{
+                        grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
+                        lineColors: Array(GRID_HEIGHT).fill('$00')
+                    }],
+                    speed: 30
+                }
             });
             setCurrentAnimation(newAnimationName);
             setCurrentFrame(0);
@@ -115,11 +118,22 @@ const SpriteAnimationEditor = () => {
         }
     };
 
+    const handleAnimationChange = (newAnimation) => {
+        setCurrentAnimation(newAnimation);
+        setCurrentFrame(0);
+        setIsPlaying(false);
+    };
+
+    const handleSpeedChange = (newSpeed) => {
+        const newAnimations = { ...animations };
+        newAnimations[currentAnimation].speed = newSpeed;
+        setAnimations(newAnimations);
+    };
+
     const saveProject = () => {
         const projectData = {
             characterName: characterName,
-            animations: animations,
-            animationSpeed: animationSpeed
+            animations: animations // This now correctly includes both frames and speed for each animation
         };
         const data = JSON.stringify(projectData, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
@@ -145,12 +159,19 @@ const SpriteAnimationEditor = () => {
                 try {
                     const loadedProject = JSON.parse(e.target.result);
                     if (typeof loadedProject.animations === 'object' && Object.keys(loadedProject.animations).length > 0) {
-                        setAnimations(loadedProject.animations);
-                        setCurrentAnimation(Object.keys(loadedProject.animations)[0]);
+                        // Ensure each animation has both frames and speed
+                        const loadedAnimations = Object.fromEntries(
+                            Object.entries(loadedProject.animations).map(([name, animation]) => [
+                                name,
+                                {
+                                    frames: animation.frames || [],
+                                    speed: animation.speed || 30 // Default to 30 if speed is not present
+                                }
+                            ])
+                        );
+                        setAnimations(loadedAnimations);
+                        setCurrentAnimation(Object.keys(loadedAnimations)[0]);
                         setCurrentFrame(0);
-                        if (typeof loadedProject.animationSpeed === 'number') {
-                            setAnimationSpeed(loadedProject.animationSpeed);
-                        }
                         if (typeof loadedProject.characterName === 'string') {
                             setCharacterName(loadedProject.characterName);
                         }
@@ -167,12 +188,6 @@ const SpriteAnimationEditor = () => {
 
     const toggleAnimation = () => {
         setIsPlaying(!isPlaying);
-    };
-
-    const handleAnimationChange = (newAnimation) => {
-        setCurrentAnimation(newAnimation);
-        setCurrentFrame(0);  // Reset to the first frame when changing animations
-        setIsPlaying(false);  // Stop the animation when switching
     };
 
     const getColorHex = (code) => {
@@ -192,24 +207,25 @@ const SpriteAnimationEditor = () => {
 
         let frameIndex = 0;
         let lastFrameTime = 0;
-        const frameDuration = (animationSpeed / ATARI_REFRESH_RATE) * 1000; // Convert to milliseconds
+        const frameDuration = (animations[currentAnimation].speed / ATARI_REFRESH_RATE) * 1000; // Convert to milliseconds
 
         const animate = (currentTime) => {
             if (currentTime - lastFrameTime >= frameDuration) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const currentAnimationFrames = animations[currentAnimation];
+                const currentAnimationFrames = animations[currentAnimation].frames;
                 if (currentAnimationFrames && currentAnimationFrames.length > 0) {
                     const frame = currentAnimationFrames[frameIndex];
                     frame.grid.forEach((row, y) => {
                         row.forEach((cell, x) => {
                             if (cell) {
                                 const colorCode = frame.lineColors[y];
-                                ctx.fillStyle = getColorHex(colorCode);
+                                const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
+                                ctx.fillStyle = colorHex;
                                 ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                             }
                         });
                     });
-                    frameIndex = (frameIndex + 1) % animations[currentAnimation].length;
+                    frameIndex = (frameIndex + 1) % currentAnimationFrames.length;
                 }
                 lastFrameTime = currentTime;
             }
@@ -225,13 +241,15 @@ const SpriteAnimationEditor = () => {
                 cancelAnimationFrame(animationRef.current);
             }
             // Render the current frame when stopped
-            const currentAnimationFrames = animations[currentAnimation];
+            const currentAnimationFrames = animations[currentAnimation].frames;
             if (currentAnimationFrames && currentAnimationFrames.length > 0) {
                 const frame = currentAnimationFrames[currentFrame];
                 frame.grid.forEach((row, y) => {
                     row.forEach((cell, x) => {
                         if (cell) {
-                            ctx.fillStyle = getColorHex(frame.lineColors[y]);
+                            const colorCode = frame.lineColors[y];
+                            const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
+                            ctx.fillStyle = colorHex;
                             ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                         }
                     });
@@ -276,8 +294,8 @@ const SpriteAnimationEditor = () => {
 
             <div className="flex mb-4">
                 <div className="mr-2">
-                    {animations[currentAnimation] && animations[currentAnimation][currentFrame] &&
-                        animations[currentAnimation][currentFrame].lineColors.map((color, index) => (
+                    {animations[currentAnimation] && animations[currentAnimation].frames[currentFrame] &&
+                        animations[currentAnimation].frames[currentFrame].lineColors.map((color, index) => (
                             <div
                                 key={index}
                                 className="w-8 h-6 border border-gray-300 cursor-pointer mb-[1px]"
@@ -288,15 +306,15 @@ const SpriteAnimationEditor = () => {
                         ))}
                 </div>
                 <div className="border border-gray-300 inline-block bg-white">
-                    {animations[currentAnimation] && animations[currentAnimation][currentFrame] &&
-                        animations[currentAnimation][currentFrame].grid.map((row, rowIndex) => (
+                    {animations[currentAnimation] && animations[currentAnimation].frames[currentFrame] &&
+                        animations[currentAnimation].frames[currentFrame].grid.map((row, rowIndex) => (
                             <div key={rowIndex} className="flex">
                                 {row.map((cell, colIndex) => (
                                     <div
                                         key={`${rowIndex}-${colIndex}`}
                                         className="w-8 h-6 border border-gray-200 cursor-pointer"
                                         style={{
-                                            backgroundColor: cell ? getColorHex(animations[currentAnimation][currentFrame].lineColors[rowIndex]) : 'transparent',
+                                            backgroundColor: cell ? getColorHex(animations[currentAnimation].frames[currentFrame].lineColors[rowIndex]) : 'transparent',
                                             opacity: cell ? 1 : 0.3
                                         }}
                                         onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -338,34 +356,19 @@ const SpriteAnimationEditor = () => {
             </div>
             <div className="flex items-center space-x-2 mb-4">
                 <Button onClick={addFrame}>Add Frame</Button>
-                <Button onClick={deleteFrame} disabled={animations[currentAnimation].length === 1}>Delete Frame</Button>
+                <Button onClick={deleteFrame} disabled={animations[currentAnimation].frames.length === 1}>Delete Frame</Button>
                 <Button onClick={copyFrame}>Copy Frame</Button>
                 <Button onClick={pasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
                 <span className="ml-4">
-                    Frame: {currentFrame + 1} of {animations[currentAnimation] ? animations[currentAnimation].length : 0}
+                    Frame: {currentFrame + 1} of {animations[currentAnimation] ? animations[currentAnimation].frames.length : 0}
                 </span>
                 <Button onClick={() => setCurrentFrame(Math.max(0, currentFrame - 1))} disabled={currentFrame === 0}>Previous</Button>
-                <Button onClick={() => setCurrentFrame(Math.min(animations[currentAnimation].length - 1, currentFrame + 1))} disabled={currentFrame === animations[currentAnimation].length - 1}>Next</Button>
+                <Button onClick={() => setCurrentFrame(Math.min(animations[currentAnimation].frames.length - 1, currentFrame + 1))} disabled={currentFrame === animations[currentAnimation].frames.length - 1}>Next</Button>
             </div>
-            <div className="flex items-center space-x-2 mb-4">
-                <span>Animation Speed (1/60th second delay):</span>
-                <Slider
-                    min={0}
-                    max={255}
-                    step={1}
-                    value={[animationSpeed]}
-                    onValueChange={(value) => setAnimationSpeed(value[0])}
-                    className="w-64"
-                />
-                <Input
-                    type="number"
-                    min={0}
-                    max={255}
-                    value={animationSpeed}
-                    onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-                    className="w-16"
-                />
-            </div>
+            <AnimationSpeedControl
+                speed={animations[currentAnimation].speed}
+                onChange={handleSpeedChange}
+            />
         </div>
     );
 };
