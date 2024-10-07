@@ -1,15 +1,15 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
-const Atari2600CodeExporter = ({ animations, characterName }) => {
+const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
     const generateCode = () => {
-        let code = `;${characterName} Sprite Data\n\n`;
+        let code = `;${characterName} Sprite Data (Height: ${spriteHeight})\n\n`;
 
         Object.entries(animations).forEach(([animationName, animation]) => {
             code += `${animationName}_Data:\n`;
             animation.frames.forEach((frame, frameIndex) => {
                 code += `  ; Frame ${frameIndex + 1}\n`;
-                frame.grid.forEach((row, rowIndex) => {
+                frame.grid.slice(0, spriteHeight).forEach((row, rowIndex) => {
                     const byte = row.reduce((acc, cell, index) => acc | (cell ? (1 << (7 - index)) : 0), 0);
                     code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${rowIndex + 1}\n`;
                 });
@@ -19,7 +19,7 @@ const Atari2600CodeExporter = ({ animations, characterName }) => {
             code += `${animationName}_ColorData:\n`;
             animation.frames.forEach((frame, frameIndex) => {
                 code += `  ; Frame ${frameIndex + 1} Colors\n`;
-                frame.lineColors.forEach((color, rowIndex) => {
+                frame.lineColors.slice(0, spriteHeight).forEach((color, rowIndex) => {
                     code += `  .byte ${color} ; Row ${rowIndex + 1}\n`;
                 });
                 code += '\n';
@@ -31,6 +31,8 @@ const Atari2600CodeExporter = ({ animations, characterName }) => {
 
         // Add some basic setup code
         code += `
+SPRITE_HEIGHT = ${spriteHeight}
+
 SetupSprites:
   lda #<${Object.keys(animations)[0]}_Data
   sta SPRITE_PTR
@@ -66,7 +68,7 @@ COLUBK = $0009 ; Background color
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${characterName}_sprite.asm`;
+        link.download = `${characterName}_sprite_h${spriteHeight}.asm`;
         link.click();
         URL.revokeObjectURL(url);
     };

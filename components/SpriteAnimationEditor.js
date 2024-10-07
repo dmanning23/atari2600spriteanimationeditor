@@ -6,21 +6,23 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ColorPalette from '@/components/ColorPalette';
 import AnimationSpeedControl from '@/components/AnimationSpeedControl';
+import SpriteHeightControl from '@/components/SpriteHeightControl';
 import colorPaletteData from '@/data/desaturated-color-palette.json';
 import Atari2600CodeExporter from '@/components/Atari2600CodeExporter';
 
 const GRID_WIDTH = 8;
-const GRID_HEIGHT = 16;
+const DEFAULT_GRID_HEIGHT = 16;
 const PIXEL_ASPECT_RATIO = 1.33; // Horizontal to vertical ratio for Atari 2600 pixels
 const ATARI_REFRESH_RATE = 60; // 60 Hz
 
 const SpriteAnimationEditor = () => {
     const [characterName, setCharacterName] = useState('');
+    const [spriteHeight, setSpriteHeight] = useState(DEFAULT_GRID_HEIGHT);
     const [animations, setAnimations] = useState({
         'Default': {
             frames: [{
-                grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                lineColors: Array(GRID_HEIGHT).fill('$00')
+                grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
+                lineColors: Array(spriteHeight).fill('$00')
             }],
             speed: 30
         }
@@ -59,11 +61,35 @@ const SpriteAnimationEditor = () => {
         setAnimations(newAnimations);
     };
 
+    const handleSpriteHeightChange = (newHeight) => {
+        setSpriteHeight(newHeight);
+        setAnimations(prevAnimations => {
+            const newAnimations = {};
+            Object.entries(prevAnimations).forEach(([name, animation]) => {
+                newAnimations[name] = {
+                    ...animation,
+                    frames: animation.frames.map(frame => ({
+                        grid: frame.grid.slice(0, newHeight).map(row => [...row]),
+                        lineColors: frame.lineColors.slice(0, newHeight)
+                    }))
+                };
+                // If new height is larger, add empty rows
+                while (newAnimations[name].frames[0].grid.length < newHeight) {
+                    newAnimations[name].frames.forEach(frame => {
+                        frame.grid.push(Array(GRID_WIDTH).fill(false));
+                        frame.lineColors.push('$00');
+                    });
+                }
+            });
+            return newAnimations;
+        });
+    };
+
     const addFrame = () => {
         const newAnimations = { ...animations };
         newAnimations[currentAnimation].frames.push({
-            grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-            lineColors: Array(GRID_HEIGHT).fill('$00')
+            grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
+            lineColors: Array(spriteHeight).fill('$00')
         });
         setAnimations(newAnimations);
         setCurrentFrame(newAnimations[currentAnimation].frames.length - 1);
@@ -96,8 +122,8 @@ const SpriteAnimationEditor = () => {
                 ...animations,
                 [newAnimationName]: {
                     frames: [{
-                        grid: Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                        lineColors: Array(GRID_HEIGHT).fill('$00')
+                        grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
+                        lineColors: Array(spriteHeight).fill('$00')
                     }],
                     speed: 30
                 }
@@ -203,7 +229,7 @@ const SpriteAnimationEditor = () => {
         const cellWidth = 20 * PIXEL_ASPECT_RATIO;
         const cellHeight = 20;
         canvas.width = GRID_WIDTH * cellWidth;
-        canvas.height = GRID_HEIGHT * cellHeight;
+        canvas.height = spriteHeight * cellHeight;
 
         let frameIndex = 0;
         let lastFrameTime = 0;
@@ -280,16 +306,19 @@ const SpriteAnimationEditor = () => {
                 />
             </div>
 
-            <div className="flex items-center space-x-2 mb-4">
-                <Button onClick={saveProject}>Save Project</Button>
-                <input
-                    type="file"
-                    accept=".json"
-                    onChange={loadProject}
-                    style={{ display: 'none' }}
-                    ref={fileInputRef}
-                />
-                <Button onClick={triggerFileInput}>Load Project</Button>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                    <Button onClick={saveProject}>Save Project</Button>
+                    <input
+                        type="file"
+                        accept=".json"
+                        onChange={loadProject}
+                        style={{ display: 'none' }}
+                        ref={fileInputRef}
+                    />
+                    <Button onClick={triggerFileInput}>Load Project</Button>
+                </div>
+                <SpriteHeightControl height={spriteHeight} onHeightChange={handleSpriteHeightChange} />
             </div>
 
             <div className="flex mb-4">
@@ -369,7 +398,10 @@ const SpriteAnimationEditor = () => {
                 speed={animations[currentAnimation].speed}
                 onChange={handleSpeedChange}
             />
-            <Atari2600CodeExporter animations={animations} characterName={characterName} />
+            <Atari2600CodeExporter
+                animations={animations}
+                characterName={characterName}
+                spriteHeight={spriteHeight} />
         </div>
     );
 };
