@@ -327,7 +327,7 @@ const SpriteAnimationEditor = () => {
                         animations[currentAnimation].frames[currentFrame].lineColors.map((color, index) => (
                             <div
                                 key={index}
-                                className="w-8 h-6 border border-gray-300 cursor-pointer mb-[1px]"
+                                className="w-8 h-6 border border-gray-300 cursor-pointer mb-[0px]"
                                 style={{ backgroundColor: color !== undefined ? getColorHex(color) : 'transparent' }}
                                 onClick={() => handleLineColorChange(index)}
                                 title={color !== undefined ? getColorHex(color) : 'No color'}
