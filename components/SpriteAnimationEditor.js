@@ -22,8 +22,9 @@ const SpriteAnimationEditor = () => {
     const [animations, setAnimations] = useState({
         'Default': {
             frames: [{
-                grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                lineColors: Array(spriteHeight).fill('$00')
+                grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
+                lineColors1: Array(spriteHeight).fill('$00'),
+                lineColors2: Array(spriteHeight).fill('$00')
             }],
             speed: 30
         }
@@ -42,22 +43,32 @@ const SpriteAnimationEditor = () => {
         const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
         frame.grid = [...frame.grid];
         frame.grid[row] = [...frame.grid[row]];
-        frame.grid[row][col] = !frame.grid[row][col];
 
-        if (frame.grid[row][col] && frame.lineColors[row] === 0) {
-            frame.lineColors = [...frame.lineColors];
-            frame.lineColors[row] = currentColor;
+        if (frame.grid[row][col] === 0) {
+            frame.grid[row][col] = 1;
+        }
+        else if (frame.grid[row][col] === 1) {
+            frame.grid[row][col] = 2;
+        }
+        else {
+            frame.grid[row][col] = 0;
         }
 
         newAnimations[currentAnimation].frames[currentFrame] = frame;
         setAnimations(newAnimations);
     };
 
-    const handleLineColorChange = (row) => {
+    const handleLineColorChange = (row, lineNumber) => {
         const newAnimations = { ...animations };
         const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
-        frame.lineColors = [...frame.lineColors];
-        frame.lineColors[row] = currentColor;
+        if (lineNumber === 1) {
+            frame.lineColors1 = [...frame.lineColors1];
+            frame.lineColors1[row] = currentColor;
+        }
+        else {
+            frame.lineColors2 = [...frame.lineColors2];
+            frame.lineColors2[row] = currentColor;
+        }
         newAnimations[currentAnimation].frames[currentFrame] = frame;
         setAnimations(newAnimations);
     };
@@ -71,14 +82,16 @@ const SpriteAnimationEditor = () => {
                     ...animation,
                     frames: animation.frames.map(frame => ({
                         grid: frame.grid.slice(0, newHeight).map(row => [...row]),
-                        lineColors: frame.lineColors.slice(0, newHeight)
+                        lineColors1: frame.lineColors1.slice(0, newHeight),
+                        lineColors2: frame.lineColors2.slice(0, newHeight)
                     }))
                 };
                 // If new height is larger, add empty rows
                 while (newAnimations[name].frames[0].grid.length < newHeight) {
                     newAnimations[name].frames.forEach(frame => {
-                        frame.grid.push(Array(GRID_WIDTH).fill(false));
-                        frame.lineColors.push('$00');
+                        frame.grid.push(Array(GRID_WIDTH).fill(0));
+                        frame.lineColors1.push('$00');
+                        frame.lineColors2.push('$00');
                     });
                 }
             });
@@ -89,8 +102,9 @@ const SpriteAnimationEditor = () => {
     const addFrame = () => {
         const newAnimations = { ...animations };
         newAnimations[currentAnimation].frames.push({
-            grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
-            lineColors: Array(spriteHeight).fill('$00')
+            grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
+            lineColors1: Array(spriteHeight).fill('$00'),
+            lineColors2: Array(spriteHeight).fill('$00'),
         });
         setAnimations(newAnimations);
         setCurrentFrame(newAnimations[currentAnimation].frames.length - 1);
@@ -123,8 +137,9 @@ const SpriteAnimationEditor = () => {
                 ...animations,
                 [newAnimationName]: {
                     frames: [{
-                        grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(false)),
-                        lineColors: Array(spriteHeight).fill('$00')
+                        grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
+                        lineColors1: Array(spriteHeight).fill('$00'),
+                        lineColors2: Array(spriteHeight).fill('$00'),
                     }],
                     speed: 30
                 }
@@ -244,8 +259,14 @@ const SpriteAnimationEditor = () => {
                     const frame = currentAnimationFrames[frameIndex];
                     frame.grid.forEach((row, y) => {
                         row.forEach((cell, x) => {
-                            if (cell) {
-                                const colorCode = frame.lineColors[y];
+                            if (cell === 1) {
+                                const colorCode = frame.lineColors1[y];
+                                const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
+                                ctx.fillStyle = colorHex;
+                                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                            }
+                            else if (cell === 2) {
+                                const colorCode = frame.lineColors2[y];
                                 const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
                                 ctx.fillStyle = colorHex;
                                 ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
@@ -273,8 +294,14 @@ const SpriteAnimationEditor = () => {
                 const frame = currentAnimationFrames[currentFrame];
                 frame.grid.forEach((row, y) => {
                     row.forEach((cell, x) => {
-                        if (cell) {
-                            const colorCode = frame.lineColors[y];
+                        if (cell === 1) {
+                            const colorCode = frame.lineColors1[y];
+                            const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
+                            ctx.fillStyle = colorHex;
+                            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                        }
+                        else if (cell === 2) {
+                            const colorCode = frame.lineColors2[y];
                             const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
                             ctx.fillStyle = colorHex;
                             ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
@@ -324,8 +351,15 @@ const SpriteAnimationEditor = () => {
 
             <div className="flex mb-4">
                 <LineColorSelector
-                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors}
+                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors1}
                     onLineColorChange={handleLineColorChange}
+                    lineNumber={1}
+                    getColorHex={getColorHex}
+                />
+                <LineColorSelector
+                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors2}
+                    onLineColorChange={handleLineColorChange}
+                    lineNumber={2}
                     getColorHex={getColorHex}
                 />
                 <div className="border border-gray-300 inline-block bg-white">
@@ -337,7 +371,12 @@ const SpriteAnimationEditor = () => {
                                         key={`${rowIndex}-${colIndex}`}
                                         className="w-8 h-6 border border-gray-200 cursor-pointer"
                                         style={{
-                                            backgroundColor: cell ? getColorHex(animations[currentAnimation].frames[currentFrame].lineColors[rowIndex]) : 'transparent',
+                                            //TODO: what is this control?
+                                            backgroundColor: cell === 1 ?
+                                                getColorHex(animations[currentAnimation].frames[currentFrame].lineColors1[rowIndex]) :
+                                                cell === 2 ?
+                                                    getColorHex(animations[currentAnimation].frames[currentFrame].lineColors2[rowIndex]) :
+                                                    'transparent',
                                             opacity: cell ? 1 : 0.3
                                         }}
                                         onClick={() => handleCellClick(rowIndex, colIndex)}

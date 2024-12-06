@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-const LineColorSelector = ({ lineColors, onLineColorChange, getColorHex }) => {
+const LineColorSelector = ({ lineColors, onLineColorChange, lineNumber, getColorHex }) => {
     return (
         <div className="mr-2">
             {lineColors && lineColors.map((color, index) => (
@@ -13,7 +13,7 @@ const LineColorSelector = ({ lineColors, onLineColorChange, getColorHex }) => {
                     style={{
                         backgroundColor: color !== undefined ? getColorHex(color) : 'transparent'
                     }}
-                    onClick={() => onLineColorChange(index)}
+                    onClick={() => onLineColorChange(index, lineNumber)}
                     title={color !== undefined ? getColorHex(color) : 'No color'}
                 />
             ))}
