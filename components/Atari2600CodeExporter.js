@@ -18,8 +18,14 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
 
             code += `${animationName}_ColorData:\n`;
             animation.frames.forEach((frame, frameIndex) => {
-                code += `  ; Frame ${frameIndex + 1} Colors\n`;
-                frame.lineColors.slice(0, spriteHeight).forEach((color, rowIndex) => {
+                code += `  ; Frame ${frameIndex + 1} 1st Colors\n`;
+                frame.lineColors1.slice(0, spriteHeight).forEach((color, rowIndex) => {
+                    code += `  .byte ${color} ; Row ${rowIndex + 1}\n`;
+                });
+                code += '\n';
+
+                code += `  ; Frame ${frameIndex + 1} 2nd Colors\n`;
+                frame.lineColors2.slice(0, spriteHeight).forEach((color, rowIndex) => {
                     code += `  .byte ${color} ; Row ${rowIndex + 1}\n`;
                 });
                 code += '\n';
