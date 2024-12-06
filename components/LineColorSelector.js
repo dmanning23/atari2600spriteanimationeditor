@@ -2,7 +2,6 @@
 'use client';
 
 import React from 'react';
-import colorPaletteData from '@/data/desaturated-color-palette.json';
 
 const LineColorSelector = ({ lineColors, onLineColorChange, getColorHex }) => {
     return (
