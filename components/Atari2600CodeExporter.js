@@ -68,7 +68,7 @@ COLUBK = $0009 ; Background color
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${characterName}_sprite_h${spriteHeight}.asm`;
+        link.download = `${characterName}_sprite.asm`;
         link.click();
         URL.revokeObjectURL(url);
     };

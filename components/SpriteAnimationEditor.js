@@ -9,6 +9,7 @@ import AnimationSpeedControl from '@/components/AnimationSpeedControl';
 import SpriteHeightControl from '@/components/SpriteHeightControl';
 import colorPaletteData from '@/data/desaturated-color-palette.json';
 import Atari2600CodeExporter from '@/components/Atari2600CodeExporter';
+import LineColorSelector from '@/components/LineColorSelector';
 
 const GRID_WIDTH = 8;
 const DEFAULT_GRID_HEIGHT = 16;
@@ -322,18 +323,11 @@ const SpriteAnimationEditor = () => {
             </div>
 
             <div className="flex mb-4">
-                <div className="mr-2">
-                    {animations[currentAnimation] && animations[currentAnimation].frames[currentFrame] &&
-                        animations[currentAnimation].frames[currentFrame].lineColors.map((color, index) => (
-                            <div
-                                key={index}
-                                className="w-8 h-6 border border-gray-300 cursor-pointer mb-[0px]"
-                                style={{ backgroundColor: color !== undefined ? getColorHex(color) : 'transparent' }}
-                                onClick={() => handleLineColorChange(index)}
-                                title={color !== undefined ? getColorHex(color) : 'No color'}
-                            />
-                        ))}
-                </div>
+                <LineColorSelector
+                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors}
+                    onLineColorChange={handleLineColorChange}
+                    getColorHex={getColorHex}
+                />
                 <div className="border border-gray-300 inline-block bg-white">
                     {animations[currentAnimation] && animations[currentAnimation].frames[currentFrame] &&
                         animations[currentAnimation].frames[currentFrame].grid.map((row, rowIndex) => (
