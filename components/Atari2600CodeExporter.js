@@ -8,9 +8,16 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
         Object.entries(animations).forEach(([animationName, animation]) => {
             code += `${animationName}_Data:\n`;
             animation.frames.forEach((frame, frameIndex) => {
-                code += `  ; Frame ${frameIndex + 1}\n`;
+                code += `  ; Frame ${frameIndex + 1} 1st\n`;
                 frame.grid.slice(0, spriteHeight).forEach((row, rowIndex) => {
-                    const byte = row.reduce((acc, cell, index) => acc | (cell ? (1 << (7 - index)) : 0), 0);
+                    const byte = row.reduce((acc, cell, index) => acc | (cell === 1 ? (1 << (7 - index)) : 0), 0);
+                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${rowIndex + 1}\n`;
+                });
+                code += '\n';
+
+                code += `  ; Frame ${frameIndex + 1} 2nd\n`;
+                frame.grid.slice(0, spriteHeight).forEach((row, rowIndex) => {
+                    const byte = row.reduce((acc, cell, index) => acc | (cell === 2 ? (1 << (7 - index)) : 0), 0);
                     code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${rowIndex + 1}\n`;
                 });
                 code += '\n';
