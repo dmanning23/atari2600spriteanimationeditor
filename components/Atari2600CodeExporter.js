@@ -9,32 +9,36 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
             code += `${animationName}_Data:\n`;
             animation.frames.forEach((frame, frameIndex) => {
                 code += `  ; Frame ${frameIndex + 1} 1st\n`;
-                frame.grid.slice(0, spriteHeight).forEach((row, rowIndex) => {
+                for (let i = spriteHeight - 1; i >= 0; i--) {
+                    const row = frame.grid[i];
                     const byte = row.reduce((acc, cell, index) => acc | (cell === 1 ? (1 << (7 - index)) : 0), 0);
-                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${rowIndex + 1}\n`;
-                });
+                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
+                }
                 code += '\n';
 
                 code += `  ; Frame ${frameIndex + 1} 2nd\n`;
-                frame.grid.slice(0, spriteHeight).forEach((row, rowIndex) => {
+                for (let i = spriteHeight - 1; i >= 0; i--) {
+                    const row = frame.grid[i];
                     const byte = row.reduce((acc, cell, index) => acc | (cell === 2 ? (1 << (7 - index)) : 0), 0);
-                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${rowIndex + 1}\n`;
-                });
+                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
+                }
                 code += '\n';
             });
 
             code += `${animationName}_ColorData:\n`;
             animation.frames.forEach((frame, frameIndex) => {
                 code += `  ; Frame ${frameIndex + 1} 1st Colors\n`;
-                frame.lineColors1.slice(0, spriteHeight).forEach((color, rowIndex) => {
-                    code += `  .byte ${color} ; Row ${rowIndex + 1}\n`;
-                });
+                for (let i = spriteHeight - 1; i >= 0; i--) {
+                    const color = frame.lineColors1[i];
+                    code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                }
                 code += '\n';
 
                 code += `  ; Frame ${frameIndex + 1} 2nd Colors\n`;
-                frame.lineColors2.slice(0, spriteHeight).forEach((color, rowIndex) => {
-                    code += `  .byte ${color} ; Row ${rowIndex + 1}\n`;
-                });
+                for (let i = spriteHeight - 1; i >= 0; i--) {
+                    const color = frame.lineColors2[i];
+                    code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                }
                 code += '\n';
             });
 
