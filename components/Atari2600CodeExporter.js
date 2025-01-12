@@ -23,10 +23,7 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
                     code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
                 }
                 code += '\n';
-            });
 
-            code += `;${animationName} Color:\n`;
-            animation.frames.forEach((frame, frameIndex) => {
                 code += `${characterName}${animationName}Color${frameIndex + 1}1\n`;
                 for (let i = spriteHeight - 1; i >= 0; i--) {
                     const color = frame.lineColors1[i];

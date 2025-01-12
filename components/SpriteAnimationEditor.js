@@ -175,6 +175,7 @@ const SpriteAnimationEditor = () => {
     const saveProject = () => {
         const projectData = {
             characterName: characterName,
+            spriteHeight: spriteHeight,
             animations: animations // This now correctly includes both frames and speed for each animation
         };
         const data = JSON.stringify(projectData, null, 2);
@@ -195,37 +196,142 @@ const SpriteAnimationEditor = () => {
 
     const loadProject = (event) => {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const loadedProject = JSON.parse(e.target.result);
-                    if (typeof loadedProject.animations === 'object' && Object.keys(loadedProject.animations).length > 0) {
-                        // Ensure each animation has both frames and speed
-                        const loadedAnimations = Object.fromEntries(
-                            Object.entries(loadedProject.animations).map(([name, animation]) => [
-                                name,
-                                {
-                                    frames: animation.frames || [],
-                                    speed: animation.speed || 30 // Default to 30 if speed is not present
-                                }
-                            ])
-                        );
-                        setAnimations(loadedAnimations);
-                        setCurrentAnimation(Object.keys(loadedAnimations)[0]);
-                        setCurrentFrame(0);
-                        if (typeof loadedProject.characterName === 'string') {
-                            setCharacterName(loadedProject.characterName);
-                        }
-                    } else {
-                        alert('Invalid file format');
-                    }
-                } catch (error) {
-                    alert('Error loading file: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
+
+        // Check if a file was actually selected
+        if (!file) {
+            alert('Please select a file');
+            return;
         }
+
+        // Validate file type (assuming we want JSON files)
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            alert('Please select a JSON file');
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onerror = () => {
+            alert('Error reading file');
+        };
+
+        reader.onload = (e) => {
+            try {
+                const loadedProject = JSON.parse(e.target.result);
+
+                // Validate overall project structure
+                if (!loadedProject || typeof loadedProject !== 'object') {
+                    throw new Error('Invalid project structure');
+                }
+
+                // Validate animations object
+                if (!loadedProject.animations || typeof loadedProject.animations !== 'object') {
+                    throw new Error('Project must contain animations object');
+                }
+
+                if (Object.keys(loadedProject.animations).length === 0) {
+                    throw new Error('Project must contain at least one animation');
+                }
+
+                // Clean and validate animations
+                const loadedAnimations = Object.fromEntries(
+                    Object.entries(loadedProject.animations).map(([name, animation]) => {
+                        // Validate animation name
+                        if (!name || typeof name !== 'string') {
+                            throw new Error(`Invalid animation name: ${name}`);
+                        }
+
+                        // Validate and clean animation object
+                        if (!animation || typeof animation !== 'object') {
+                            throw new Error(`Invalid animation data for: ${name}`);
+                        }
+
+                        // Validate frames
+                        if (!Array.isArray(animation.frames)) {
+                            throw new Error(`Animation "${name}" must have frames array`);
+                        }
+
+                        // Validate each frame's structure
+                        const validatedFrames = animation.frames.map((frame, index) => {
+                            if (!frame || typeof frame !== 'object') {
+                                throw new Error(`Invalid frame object in animation "${name}" at position ${index}`);
+                            }
+
+                            // Validate grid
+                            if (!Array.isArray(frame.grid)) {
+                                throw new Error(`Missing grid data in animation "${name}" frame ${index}`);
+                            }
+
+                            // Validate grid dimensions and content
+                            const height = frame.grid.length;
+                            const width = frame.grid[0]?.length;
+
+                            if (!height || !width) {
+                                throw new Error(`Empty grid in animation "${name}" frame ${index}`);
+                            }
+
+                            // Validate each row has same width and contains only valid values (0, 1, or 2)
+                            frame.grid.forEach((row, rowIndex) => {
+                                if (!Array.isArray(row) || row.length !== width) {
+                                    throw new Error(`Invalid grid row ${rowIndex} in animation "${name}" frame ${index}`);
+                                }
+                                if (!row.every(cell => [0, 1, 2].includes(cell))) {
+                                    throw new Error(`Invalid grid values in animation "${name}" frame ${index} row ${rowIndex}`);
+                                }
+                            });
+
+                            // Validate line colors
+                            if (!Array.isArray(frame.lineColors1) || !Array.isArray(frame.lineColors2)) {
+                                throw new Error(`Missing line colors in animation "${name}" frame ${index}`);
+                            }
+
+                            if (frame.lineColors1.length !== height || frame.lineColors2.length !== height) {
+                                throw new Error(`Line colors length mismatch in animation "${name}" frame ${index}`);
+                            }
+
+                            // Return validated frame
+                            return {
+                                grid: frame.grid,
+                                lineColors1: frame.lineColors1,
+                                lineColors2: frame.lineColors2
+                            };
+                        });
+
+                        // Validate and clean speed
+                        let speed = Number(animation.speed);
+                        if (isNaN(speed) || speed <= 0) {
+                            speed = 30; // Default speed
+                        }
+                        speed = Math.min(Math.max(speed, 1), 120); // Clamp between 1 and 120
+
+                        return [
+                            name,
+                            {
+                                frames: validatedFrames,
+                                speed
+                            }
+                        ];
+                    })
+                );
+
+                // Clean character name
+                const characterName = typeof loadedProject.characterName === 'string'
+                    ? loadedProject.characterName.trim()
+                    : 'Untitled Character';
+
+                // Update state only after all validations pass
+                setSpriteHeight(loadedProject.spriteHeight)
+                setAnimations(loadedAnimations);
+                setCurrentAnimation(Object.keys(loadedAnimations)[0]);
+                setCurrentFrame(0);
+                setCharacterName(characterName);
+
+            } catch (error) {
+                alert(`Error loading project: ${error.message}`);
+            }
+        };
+
+        reader.readAsText(file);
     };
 
     const toggleAnimation = () => {
