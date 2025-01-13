@@ -39,8 +39,11 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
                 code += '\n';
             });
 
-            code += `${animationName}Speed:\n`;
+            code += `${characterName}${animationName}Speed:\n`;
             code += `  .byte ${animation.speed} ; Animation speed\n\n`;
+
+            code += `${characterName}${animationName}Frames:\n`;
+            code += `  .byte ${animation.frames.length} ; Number of frames\n\n`;
         });
 
         return code;
