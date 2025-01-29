@@ -549,7 +549,6 @@ const SpriteAnimationEditor = () => {
                     spriteHeight={spriteHeight}
                     withColor={false} />
             </div>
-
         </div>
     );
 };
