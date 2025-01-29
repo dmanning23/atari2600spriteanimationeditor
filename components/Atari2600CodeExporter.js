@@ -1,8 +1,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
-const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
+const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withColor }) => {
     const generateCode = () => {
+
+
+
         let code = `;${characterName} Sprite Data (Height: ${spriteHeight})\n\n`;
 
         Object.entries(animations).forEach(([animationName, animation]) => {
@@ -24,19 +27,21 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
                 }
                 code += '\n';
 
-                code += `${characterName}${animationName}Color${frameIndex + 1}1\n`;
-                for (let i = spriteHeight - 1; i >= 0; i--) {
-                    const color = frame.lineColors1[i];
-                    code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
-                }
-                code += '\n';
+                if (withColor) {
+                    code += `${characterName}${animationName}Color${frameIndex + 1}1\n`;
+                    for (let i = spriteHeight - 1; i >= 0; i--) {
+                        const color = frame.lineColors1[i];
+                        code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                    }
+                    code += '\n';
 
-                code += `${characterName}${animationName}Color${frameIndex + 1}2\n`;
-                for (let i = spriteHeight - 1; i >= 0; i--) {
-                    const color = frame.lineColors2[i];
-                    code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                    code += `${characterName}${animationName}Color${frameIndex + 1}2\n`;
+                    for (let i = spriteHeight - 1; i >= 0; i--) {
+                        const color = frame.lineColors2[i];
+                        code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                    }
+                    code += '\n';
                 }
-                code += '\n';
             });
 
             code += `${characterName}${animationName}Speed:\n`;
@@ -60,9 +65,13 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight }) => {
         URL.revokeObjectURL(url);
     };
 
+    console.log('withColor prop:', withColor);
+
     return (
         <div>
-            <Button onClick={downloadCode}>Export 6502 Assembly Code</Button>
+            <Button onClick={downloadCode}>
+                Export 6502 {withColor ? "(with colors)" : "(no colors)"}
+            </Button>
         </div>
     );
 };

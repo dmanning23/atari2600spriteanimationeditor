@@ -537,10 +537,19 @@ const SpriteAnimationEditor = () => {
                 speed={animations[currentAnimation].speed}
                 onChange={handleSpeedChange}
             />
-            <Atari2600CodeExporter
-                animations={animations}
-                characterName={characterName}
-                spriteHeight={spriteHeight} />
+            <div className="flex items-center space-x-2 mb-4">
+                <Atari2600CodeExporter
+                    animations={animations}
+                    characterName={characterName}
+                    spriteHeight={spriteHeight}
+                    withColor={true} />
+                <Atari2600CodeExporter
+                    animations={animations}
+                    characterName={characterName}
+                    spriteHeight={spriteHeight}
+                    withColor={false} />
+            </div>
+
         </div>
     );
 };
