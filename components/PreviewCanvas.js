@@ -122,7 +122,8 @@ const PreviewCanvas = ({
         currentFrame,
         spriteMode,
         spriteHeight,
-        getColorHex
+        getColorHex,
+        getGridWidth
     ]);
 
     return (

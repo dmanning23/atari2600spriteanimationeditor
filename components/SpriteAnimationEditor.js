@@ -32,7 +32,6 @@ const SpriteAnimationEditor = () => {
     const [currentColor, setCurrentColor] = useState('$0E'); // Default to white
     const [copiedFrame, setCopiedFrame] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const fileInputRef = useRef(null);
 
     // Function to determine grid width based on mode
     function getGridWidth() {
