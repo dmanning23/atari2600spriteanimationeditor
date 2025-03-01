@@ -235,19 +235,32 @@ const SpriteAnimationEditor = () => {
         }
     }, [animations, currentAnimation]);
 
-    // Callbacks for frame controls
     const handleAddFrame = useCallback(() => {
         setAnimations(prevAnimations => {
             const newAnimations = { ...prevAnimations };
-            newAnimations[currentAnimation].frames.push({
-                grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
-                lineColors1: Array(spriteHeight).fill('$00'),
-                lineColors2: Array(spriteHeight).fill('$00'),
-            });
+
+            // Add the new frame
+            newAnimations[currentAnimation].frames = [
+                ...newAnimations[currentAnimation].frames,
+                {
+                    grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
+                    lineColors1: Array(spriteHeight).fill('$00'),
+                    lineColors2: Array(spriteHeight).fill('$00'),
+                }
+            ];
+
+            // Set the current frame in the next tick after state update
+            // We know the new frame will be at the end of the array
+            const newFrameIndex = newAnimations[currentAnimation].frames.length - 1;
+
+            // We'll use setTimeout to ensure this runs after state update
+            setTimeout(() => {
+                setCurrentFrame(newFrameIndex);
+            }, 0);
+
             return newAnimations;
         });
-        setCurrentFrame(animations[currentAnimation].frames.length);
-    }, [animations, currentAnimation, spriteHeight, getGridWidth]);
+    }, [currentAnimation, spriteHeight, getGridWidth]);
 
     const handleDeleteFrame = useCallback(() => {
         if (animations[currentAnimation].frames.length > 1) {
