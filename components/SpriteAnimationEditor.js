@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import colorPaletteData from '../data/desaturated-color-palette.json';
 
 // Import modular components - using relative paths
