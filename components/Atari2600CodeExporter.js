@@ -1,46 +1,76 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 
-const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withColor }) => {
+const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withColor, mode }) => {
     const generateCode = () => {
-
-
-
-        let code = `;${characterName} Sprite Data (Height: ${spriteHeight})\n\n`;
+        let code = `;${characterName} Sprite Data (Height: ${spriteHeight}, Mode: ${mode})\n\n`;
 
         Object.entries(animations).forEach(([animationName, animation]) => {
             code += `;${animationName} Animation Data:\n`;
             animation.frames.forEach((frame, frameIndex) => {
-                code += `${characterName}${animationName}${frameIndex + 1}1\n`;
-                for (let i = spriteHeight - 1; i >= 0; i--) {
-                    const row = frame.grid[i];
-                    const byte = row.reduce((acc, cell, index) => acc | (cell === 1 ? (1 << (7 - index)) : 0), 0);
-                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
-                }
-                code += '\n';
-
-                code += `${characterName}${animationName}${frameIndex + 1}2\n`;
-                for (let i = spriteHeight - 1; i >= 0; i--) {
-                    const row = frame.grid[i];
-                    const byte = row.reduce((acc, cell, index) => acc | (cell === 2 ? (1 << (7 - index)) : 0), 0);
-                    code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
-                }
-                code += '\n';
-
-                if (withColor) {
-                    code += `${characterName}${animationName}Color${frameIndex + 1}1\n`;
+                // For double-width mode, we need to handle 16-column wide sprites
+                if (mode === 'doubleWidth') {
+                    code += `${characterName}${animationName}${frameIndex + 1}1\n`;
                     for (let i = spriteHeight - 1; i >= 0; i--) {
-                        const color = frame.lineColors1[i];
-                        code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        const row = frame.grid[i];
+                        // First byte (leftmost 8 pixels)
+                        const leftByte = row.slice(0, 8).reduce((acc, cell, index) =>
+                            acc | (cell !== 0 ? (1 << (7 - index)) : 0), 0);
+                        code += `  .byte %${leftByte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i} (left)\n`;
                     }
                     code += '\n';
 
-                    code += `${characterName}${animationName}Color${frameIndex + 1}2\n`;
+                    code += `${characterName}${animationName}${frameIndex + 1}2\n`;
                     for (let i = spriteHeight - 1; i >= 0; i--) {
-                        const color = frame.lineColors2[i];
-                        code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        const row = frame.grid[i];
+                        // Second byte (rightmost 8 pixels)
+                        const rightByte = row.slice(8, 16).reduce((acc, cell, index) =>
+                            acc | (cell !== 0 ? (1 << (7 - index)) : 0), 0);
+                        code += `  .byte %${rightByte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i} (right)\n`;
                     }
                     code += '\n';
+
+                    if (withColor) {
+                        code += `${characterName}${animationName}Color${frameIndex + 1}\n`;
+                        for (let i = spriteHeight - 1; i >= 0; i--) {
+                            const color = frame.lineColors1[i];
+                            code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        }
+                        code += '\n';
+                    }
+                } else {
+                    // Original double-color mode
+                    code += `${characterName}${animationName}${frameIndex + 1}1\n`;
+                    for (let i = spriteHeight - 1; i >= 0; i--) {
+                        const row = frame.grid[i];
+                        const byte = row.reduce((acc, cell, index) => acc | (cell === 1 ? (1 << (7 - index)) : 0), 0);
+                        code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
+                    }
+                    code += '\n';
+
+                    code += `${characterName}${animationName}${frameIndex + 1}2\n`;
+                    for (let i = spriteHeight - 1; i >= 0; i--) {
+                        const row = frame.grid[i];
+                        const byte = row.reduce((acc, cell, index) => acc | (cell === 2 ? (1 << (7 - index)) : 0), 0);
+                        code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
+                    }
+                    code += '\n';
+
+                    if (withColor) {
+                        code += `${characterName}${animationName}Color${frameIndex + 1}1\n`;
+                        for (let i = spriteHeight - 1; i >= 0; i--) {
+                            const color = frame.lineColors1[i];
+                            code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        }
+                        code += '\n';
+
+                        code += `${characterName}${animationName}Color${frameIndex + 1}2\n`;
+                        for (let i = spriteHeight - 1; i >= 0; i--) {
+                            const color = frame.lineColors2[i];
+                            code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        }
+                        code += '\n';
+                    }
                 }
             });
 
@@ -65,12 +95,10 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withCo
         URL.revokeObjectURL(url);
     };
 
-    console.log('withColor prop:', withColor);
-
     return (
         <div>
             <Button onClick={downloadCode}>
-                Export 6502{withColor ? "" : " (no colors)"}
+                Export 6502{mode === 'doubleWidth' ? " (double width)" : (withColor ? "" : " (no colors)")}
             </Button>
         </div>
     );

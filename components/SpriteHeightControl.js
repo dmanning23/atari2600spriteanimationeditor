@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 const SpriteHeightControl = ({ height, onHeightChange }) => {
     const possibleHeights = [4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24];

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import colorPaletteData from '@/data/desaturated-color-palette.json';
+import { Button } from '../components/ui/button';
+import colorPaletteData from '../data/desaturated-color-palette.json';
 
 const ColorPalette = ({ onColorSelect, currentColor }) => {
     const getColorHex = (code) => {

@@ -1,28 +1,26 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import ColorPalette from '@/components/ColorPalette';
-import AnimationSpeedControl from '@/components/AnimationSpeedControl';
-import SpriteHeightControl from '@/components/SpriteHeightControl';
-import colorPaletteData from '@/data/desaturated-color-palette.json';
-import Atari2600CodeExporter from '@/components/Atari2600CodeExporter';
-import LineColorSelector from '@/components/LineColorSelector';
+import React, { useState, useCallback, useRef } from 'react';
+import colorPaletteData from '../data/desaturated-color-palette.json';
 
-const GRID_WIDTH = 8;
+// Import modular components - using relative paths
+import HeaderControls from './HeaderControls';
+import AnimationSelector from './AnimationSelector';
+import FrameControls from './FrameControls';
+import ColorControls from './ColorControls';
+import GridEditor from './GridEditor';
+import PreviewCanvas from './PreviewCanvas';
+
 const DEFAULT_GRID_HEIGHT = 16;
-const PIXEL_ASPECT_RATIO = 1.33; // Horizontal to vertical ratio for Atari 2600 pixels
-const ATARI_REFRESH_RATE = 60; // 60 Hz
 
 const SpriteAnimationEditor = () => {
     const [characterName, setCharacterName] = useState('');
+    const [spriteMode, setSpriteMode] = useState('doubleColor');
     const [spriteHeight, setSpriteHeight] = useState(DEFAULT_GRID_HEIGHT);
     const [animations, setAnimations] = useState({
         'Default': {
             frames: [{
-                grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
+                grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
                 lineColors1: Array(spriteHeight).fill('$00'),
                 lineColors2: Array(spriteHeight).fill('$00')
             }],
@@ -34,46 +32,84 @@ const SpriteAnimationEditor = () => {
     const [currentColor, setCurrentColor] = useState('$0E'); // Default to white
     const [copiedFrame, setCopiedFrame] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [newAnimationName, setNewAnimationName] = useState('');
-    const canvasRef = useRef(null);
-    const animationRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    const handleCellClick = (row, col) => {
-        const newAnimations = { ...animations };
-        const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
-        frame.grid = [...frame.grid];
-        frame.grid[row] = [...frame.grid[row]];
+    // Function to determine grid width based on mode
+    function getGridWidth() {
+        return spriteMode === 'doubleWidth' ? 16 : 8;
+    }
 
-        if (frame.grid[row][col] === 0) {
-            frame.grid[row][col] = 1;
-        }
-        else if (frame.grid[row][col] === 1) {
-            frame.grid[row][col] = 2;
-        }
-        else {
-            frame.grid[row][col] = 0;
-        }
+    // Callback functions for grid editing
+    const handleCellClick = useCallback((row, col) => {
+        // Use functional update to ensure we're working with the latest state
+        setAnimations(prevAnimations => {
+            // Create a deep copy of the current frame to work with
+            const currentFrameCopy = JSON.parse(
+                JSON.stringify(prevAnimations[currentAnimation].frames[currentFrame])
+            );
 
-        newAnimations[currentAnimation].frames[currentFrame] = frame;
-        setAnimations(newAnimations);
-    };
+            // Get the current cell value before making changes
+            const currentCellValue = currentFrameCopy.grid[row][col];
 
-    const handleLineColorChange = (row, lineNumber) => {
-        const newAnimations = { ...animations };
-        const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
-        if (lineNumber === 1) {
-            frame.lineColors1 = [...frame.lineColors1];
-            frame.lineColors1[row] = currentColor;
-        }
-        else {
-            frame.lineColors2 = [...frame.lineColors2];
-            frame.lineColors2[row] = currentColor;
-        }
-        newAnimations[currentAnimation].frames[currentFrame] = frame;
-        setAnimations(newAnimations);
-    };
+            // Create a copy of the entire animations object to maintain immutability
+            const newAnimations = { ...prevAnimations };
+            newAnimations[currentAnimation] = {
+                ...newAnimations[currentAnimation],
+                frames: [...newAnimations[currentAnimation].frames]
+            };
 
-    const handleSpriteHeightChange = (newHeight) => {
+            // Clone the specific frame we're modifying
+            newAnimations[currentAnimation].frames[currentFrame] = {
+                ...newAnimations[currentAnimation].frames[currentFrame],
+                grid: [...newAnimations[currentAnimation].frames[currentFrame].grid]
+            };
+
+            // Create a fresh copy of the row we're modifying
+            newAnimations[currentAnimation].frames[currentFrame].grid[row] =
+                [...newAnimations[currentAnimation].frames[currentFrame].grid[row]];
+
+            // Modify the cell value based on mode and current value
+            if (spriteMode === 'doubleColor') {
+                // In double color mode, cycle through 0->1->2->0
+                // Use a deterministic approach based on the current value
+                if (currentCellValue === 0) {
+                    newAnimations[currentAnimation].frames[currentFrame].grid[row][col] = 1;
+                }
+                else if (currentCellValue === 1) {
+                    newAnimations[currentAnimation].frames[currentFrame].grid[row][col] = 2;
+                }
+                else {
+                    newAnimations[currentAnimation].frames[currentFrame].grid[row][col] = 0;
+                }
+            } else if (spriteMode === 'doubleWidth') {
+                // In double width mode, toggle between 0 and 1
+                newAnimations[currentAnimation].frames[currentFrame].grid[row][col] =
+                    currentCellValue === 0 ? 1 : 0;
+            }
+
+            return newAnimations;
+        });
+    }, [currentAnimation, currentFrame, spriteMode]);
+
+    const handleLineColorChange = useCallback((row, lineNumber) => {
+        setAnimations(prevAnimations => {
+            const newAnimations = { ...prevAnimations };
+            const frame = { ...newAnimations[currentAnimation].frames[currentFrame] };
+            if (lineNumber === 1) {
+                frame.lineColors1 = [...frame.lineColors1];
+                frame.lineColors1[row] = currentColor;
+            }
+            else if (spriteMode === 'doubleColor') {
+                frame.lineColors2 = [...frame.lineColors2];
+                frame.lineColors2[row] = currentColor;
+            }
+            newAnimations[currentAnimation].frames[currentFrame] = frame;
+            return newAnimations;
+        });
+    }, [currentAnimation, currentFrame, currentColor, spriteMode]);
+
+    // Callbacks for header controls
+    const handleSpriteHeightChange = useCallback((newHeight) => {
         setSpriteHeight(newHeight);
         setAnimations(prevAnimations => {
             const newAnimations = {};
@@ -89,7 +125,7 @@ const SpriteAnimationEditor = () => {
                 // If new height is larger, add empty rows
                 while (newAnimations[name].frames[0].grid.length < newHeight) {
                     newAnimations[name].frames.forEach(frame => {
-                        frame.grid.push(Array(GRID_WIDTH).fill(0));
+                        frame.grid.push(Array(getGridWidth()).fill(0));
                         frame.lineColors1.push('$00');
                         frame.lineColors2.push('$00');
                     });
@@ -97,86 +133,184 @@ const SpriteAnimationEditor = () => {
             });
             return newAnimations;
         });
-    };
+    }, [getGridWidth]);
 
-    const addFrame = () => {
-        const newAnimations = { ...animations };
-        newAnimations[currentAnimation].frames.push({
-            grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
-            lineColors1: Array(spriteHeight).fill('$00'),
-            lineColors2: Array(spriteHeight).fill('$00'),
-        });
-        setAnimations(newAnimations);
-        setCurrentFrame(newAnimations[currentAnimation].frames.length - 1);
-    };
+    const handleModeChange = useCallback((newMode) => {
+        setSpriteMode(newMode);
 
-    const deleteFrame = () => {
-        if (animations[currentAnimation].frames.length > 1) {
-            const newAnimations = { ...animations };
-            newAnimations[currentAnimation].frames = newAnimations[currentAnimation].frames.filter((_, index) => index !== currentFrame);
-            setAnimations(newAnimations);
-            setCurrentFrame(Math.min(currentFrame, newAnimations[currentAnimation].frames.length - 1));
-        }
-    };
+        // If changing from doubleColor to doubleWidth
+        if (spriteMode === 'doubleColor' && newMode === 'doubleWidth') {
+            // Convert existing animations to double width format
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
 
-    const copyFrame = () => {
-        setCopiedFrame(JSON.parse(JSON.stringify(animations[currentAnimation].frames[currentFrame])));
-    };
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        // Create a new grid with width 16
+                        const newGrid = Array(frame.grid.length).fill().map((_, rowIndex) => {
+                            const oldRow = frame.grid[rowIndex];
+                            // Extend each row to 16 cells, initialized with 0
+                            return [...oldRow, ...Array(8).fill(0)];
+                        });
 
-    const pasteFrame = () => {
-        if (copiedFrame) {
-            const newAnimations = { ...animations };
-            newAnimations[currentAnimation].frames[currentFrame] = JSON.parse(JSON.stringify(copiedFrame));
-            setAnimations(newAnimations);
-        }
-    };
+                        // In the conversion, we'll treat color1 and color2 as filled positions
+                        // but only use color1 in the new format
+                        for (let i = 0; i < frame.grid.length; i++) {
+                            for (let j = 0; j < 8; j++) {
+                                if (frame.grid[i][j] === 2) { // If was color2
+                                    newGrid[i][j] = 1; // Convert to filled in doubleWidth
+                                }
+                            }
+                        }
 
-    const addAnimation = () => {
-        if (newAnimationName && !animations[newAnimationName]) {
-            setAnimations({
-                ...animations,
-                [newAnimationName]: {
-                    frames: [{
-                        grid: Array(spriteHeight).fill().map(() => Array(GRID_WIDTH).fill(0)),
-                        lineColors1: Array(spriteHeight).fill('$00'),
-                        lineColors2: Array(spriteHeight).fill('$00'),
-                    }],
-                    speed: 30
-                }
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1], // Keep color1
+                            lineColors2: [...frame.lineColors2]  // Keep color2 for potential conversion back
+                        };
+                    });
+                });
+
+                return newAnimations;
             });
-            setCurrentAnimation(newAnimationName);
-            setCurrentFrame(0);
-            setNewAnimationName('');
         }
-    };
+        // If changing from doubleWidth to doubleColor
+        else if (spriteMode === 'doubleWidth' && newMode === 'doubleColor') {
+            // Convert existing animations back to double color format
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
 
-    const deleteAnimation = () => {
-        if (Object.keys(animations).length > 1) {
-            const newAnimations = { ...animations };
-            delete newAnimations[currentAnimation];
-            setAnimations(newAnimations);
-            setCurrentAnimation(Object.keys(newAnimations)[0]);
-            setCurrentFrame(0);
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        // Create a new grid with width 8
+                        const newGrid = Array(frame.grid.length).fill().map((_, rowIndex) => {
+                            // Keep only the first 8 cells from each row
+                            return frame.grid[rowIndex].slice(0, 8);
+                        });
+
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1],
+                            lineColors2: [...frame.lineColors2]
+                        };
+                    });
+                });
+
+                return newAnimations;
+            });
         }
-    };
+    }, [spriteMode]);
 
-    const handleAnimationChange = (newAnimation) => {
+    // Callbacks for animation selector
+    const handleAnimationChange = useCallback((newAnimation) => {
         setCurrentAnimation(newAnimation);
         setCurrentFrame(0);
         setIsPlaying(false);
-    };
+    }, []);
 
-    const handleSpeedChange = (newSpeed) => {
-        const newAnimations = { ...animations };
-        newAnimations[currentAnimation].speed = newSpeed;
-        setAnimations(newAnimations);
-    };
+    const handleAddAnimation = useCallback((newAnimationName) => {
+        setAnimations(prevAnimations => ({
+            ...prevAnimations,
+            [newAnimationName]: {
+                frames: [{
+                    grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
+                    lineColors1: Array(spriteHeight).fill('$00'),
+                    lineColors2: Array(spriteHeight).fill('$00'),
+                }],
+                speed: 30
+            }
+        }));
+        setCurrentAnimation(newAnimationName);
+        setCurrentFrame(0);
+    }, [spriteHeight, getGridWidth]);
 
-    const saveProject = () => {
+    const handleDeleteAnimation = useCallback(() => {
+        if (Object.keys(animations).length > 1) {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                delete newAnimations[currentAnimation];
+                return newAnimations;
+            });
+            setCurrentAnimation(Object.keys(animations).filter(name => name !== currentAnimation)[0]);
+            setCurrentFrame(0);
+        }
+    }, [animations, currentAnimation]);
+
+    // Callbacks for frame controls
+    const handleAddFrame = useCallback(() => {
+        setAnimations(prevAnimations => {
+            const newAnimations = { ...prevAnimations };
+            newAnimations[currentAnimation].frames.push({
+                grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
+                lineColors1: Array(spriteHeight).fill('$00'),
+                lineColors2: Array(spriteHeight).fill('$00'),
+            });
+            return newAnimations;
+        });
+        setCurrentFrame(animations[currentAnimation].frames.length);
+    }, [animations, currentAnimation, spriteHeight, getGridWidth]);
+
+    const handleDeleteFrame = useCallback(() => {
+        if (animations[currentAnimation].frames.length > 1) {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                newAnimations[currentAnimation].frames = newAnimations[currentAnimation].frames.filter((_, index) => index !== currentFrame);
+                return newAnimations;
+            });
+            setCurrentFrame(prev => Math.min(prev, animations[currentAnimation].frames.length - 2));
+        }
+    }, [animations, currentAnimation, currentFrame]);
+
+    const handleCopyFrame = useCallback(() => {
+        setCopiedFrame(JSON.parse(JSON.stringify(animations[currentAnimation].frames[currentFrame])));
+    }, [animations, currentAnimation, currentFrame]);
+
+    const handlePasteFrame = useCallback(() => {
+        if (copiedFrame) {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                // If pasting from a different mode, need to adjust the frame
+                if (copiedFrame.grid[0].length !== getGridWidth()) {
+                    const adjustedFrame = { ...copiedFrame };
+                    if (spriteMode === 'doubleWidth') {
+                        // Extend grid to 16 columns
+                        adjustedFrame.grid = adjustedFrame.grid.map(row => [...row, ...Array(8).fill(0)]);
+                    } else {
+                        // Trim grid to 8 columns
+                        adjustedFrame.grid = adjustedFrame.grid.map(row => row.slice(0, 8));
+                    }
+                    newAnimations[currentAnimation].frames[currentFrame] = adjustedFrame;
+                } else {
+                    newAnimations[currentAnimation].frames[currentFrame] = JSON.parse(JSON.stringify(copiedFrame));
+                }
+                return newAnimations;
+            });
+        }
+    }, [copiedFrame, currentAnimation, currentFrame, spriteMode, getGridWidth]);
+
+    const handlePreviousFrame = useCallback(() => {
+        setCurrentFrame(prev => Math.max(0, prev - 1));
+    }, []);
+
+    const handleNextFrame = useCallback(() => {
+        setCurrentFrame(prev => Math.min(animations[currentAnimation].frames.length - 1, prev + 1));
+    }, [animations, currentAnimation]);
+
+    const handleSpeedChange = useCallback((newSpeed) => {
+        setAnimations(prevAnimations => {
+            const newAnimations = { ...prevAnimations };
+            newAnimations[currentAnimation].speed = newSpeed;
+            return newAnimations;
+        });
+    }, [currentAnimation]);
+
+    // Project saving and loading
+    const saveProject = useCallback(() => {
         const projectData = {
             characterName: characterName,
             spriteHeight: spriteHeight,
-            animations: animations // This now correctly includes both frames and speed for each animation
+            spriteMode: spriteMode,
+            animations: animations
         };
         const data = JSON.stringify(projectData, null, 2);
         const blob = new Blob([data], { type: 'application/json' });
@@ -186,15 +320,9 @@ const SpriteAnimationEditor = () => {
         link.download = `${characterName || 'sprite'}_project.json`;
         link.click();
         URL.revokeObjectURL(url);
-    };
+    }, [characterName, spriteHeight, spriteMode, animations]);
 
-    const fileInputRef = useRef(null);
-
-    const triggerFileInput = () => {
-        fileInputRef.current.click();
-    };
-
-    const loadProject = (event) => {
+    const loadProject = useCallback((event) => {
         const file = event.target.files[0];
 
         // Check if a file was actually selected
@@ -270,12 +398,17 @@ const SpriteAnimationEditor = () => {
                                 throw new Error(`Empty grid in animation "${name}" frame ${index}`);
                             }
 
-                            // Validate each row has same width and contains only valid values (0, 1, or 2)
+                            // For double color mode validate values are 0, 1, or 2
+                            // For double width mode validate values are 0 or 1
+                            const validValues = loadedProject.spriteMode === 'doubleWidth' ? [0, 1] : [0, 1, 2];
+
+                            // Validate each row has same width and contains only valid values
                             frame.grid.forEach((row, rowIndex) => {
                                 if (!Array.isArray(row) || row.length !== width) {
                                     throw new Error(`Invalid grid row ${rowIndex} in animation "${name}" frame ${index}`);
                                 }
-                                if (!row.every(cell => [0, 1, 2].includes(cell))) {
+
+                                if (!row.every(cell => validValues.includes(cell))) {
                                     throw new Error(`Invalid grid values in animation "${name}" frame ${index} row ${rowIndex}`);
                                 }
                             });
@@ -319,8 +452,12 @@ const SpriteAnimationEditor = () => {
                     ? loadedProject.characterName.trim()
                     : 'Untitled Character';
 
+                // Set sprite mode (default to doubleColor if not specified in project)
+                const spriteMode = loadedProject.spriteMode === 'doubleWidth' ? 'doubleWidth' : 'doubleColor';
+
                 // Update state only after all validations pass
-                setSpriteHeight(loadedProject.spriteHeight)
+                setSpriteHeight(loadedProject.spriteHeight);
+                setSpriteMode(spriteMode);
                 setAnimations(loadedAnimations);
                 setCurrentAnimation(Object.keys(loadedAnimations)[0]);
                 setCurrentFrame(0);
@@ -332,222 +469,86 @@ const SpriteAnimationEditor = () => {
         };
 
         reader.readAsText(file);
-    };
+    }, []);
 
-    const toggleAnimation = () => {
-        setIsPlaying(!isPlaying);
-    };
+    const toggleAnimation = useCallback(() => {
+        setIsPlaying(prev => !prev);
+    }, []);
 
-    const getColorHex = (code) => {
+    const getColorHex = useCallback((code) => {
         const colorObj = colorPaletteData.palette.find(c => c.code === code);
         return colorObj ? colorObj.color : 'transparent';
-    };
-
-    useEffect(() => {
-        if (!canvasRef.current) return;
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const cellWidth = 20 * PIXEL_ASPECT_RATIO;
-        const cellHeight = 20;
-        canvas.width = GRID_WIDTH * cellWidth;
-        canvas.height = spriteHeight * cellHeight;
-
-        let frameIndex = 0;
-        let lastFrameTime = 0;
-        const frameDuration = (animations[currentAnimation].speed / ATARI_REFRESH_RATE) * 1000; // Convert to milliseconds
-
-        const animate = (currentTime) => {
-            if (currentTime - lastFrameTime >= frameDuration) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const currentAnimationFrames = animations[currentAnimation].frames;
-                if (currentAnimationFrames && currentAnimationFrames.length > 0) {
-                    const frame = currentAnimationFrames[frameIndex];
-                    frame.grid.forEach((row, y) => {
-                        row.forEach((cell, x) => {
-                            if (cell === 1) {
-                                const colorCode = frame.lineColors1[y];
-                                const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
-                                ctx.fillStyle = colorHex;
-                                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                            }
-                            else if (cell === 2) {
-                                const colorCode = frame.lineColors2[y];
-                                const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
-                                ctx.fillStyle = colorHex;
-                                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                            }
-                        });
-                    });
-                    frameIndex = (frameIndex + 1) % currentAnimationFrames.length;
-                }
-                lastFrameTime = currentTime;
-            }
-            if (isPlaying) {
-                animationRef.current = requestAnimationFrame(animate);
-            }
-        };
-
-        if (isPlaying) {
-            animationRef.current = requestAnimationFrame(animate);
-        } else {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-            // Render the current frame when stopped
-            const currentAnimationFrames = animations[currentAnimation].frames;
-            if (currentAnimationFrames && currentAnimationFrames.length > 0) {
-                const frame = currentAnimationFrames[currentFrame];
-                frame.grid.forEach((row, y) => {
-                    row.forEach((cell, x) => {
-                        if (cell === 1) {
-                            const colorCode = frame.lineColors1[y];
-                            const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
-                            ctx.fillStyle = colorHex;
-                            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                        }
-                        else if (cell === 2) {
-                            const colorCode = frame.lineColors2[y];
-                            const colorHex = colorPaletteData.palette.find(c => c.code === colorCode)?.color || '#000000';
-                            ctx.fillStyle = colorHex;
-                            ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
-                        }
-                    });
-                });
-            }
-        }
-
-        return () => {
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-        };
-    }, [isPlaying, animations, currentAnimation, currentFrame]);
+    }, []);
 
     return (
         <div className="p-4 bg-gray-100">
-            <h1 className="text-2xl font-bold mb-4">Atari 2600 Sprite Animation Editor</h1>
 
-            <div className="mb-4">
-                <label htmlFor="character-name" className="block text-sm font-medium text-gray-700">Character Name</label>
-                <Input
-                    id="character-name"
-                    type="text"
-                    value={characterName}
-                    onChange={(e) => setCharacterName(e.target.value)}
-                    placeholder="Enter character name"
-                    className="mt-1"
-                />
-            </div>
-
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-2">
-                    <Button onClick={saveProject}>Save Project</Button>
-                    <input
-                        type="file"
-                        accept=".json"
-                        onChange={loadProject}
-                        style={{ display: 'none' }}
-                        ref={fileInputRef}
-                    />
-                    <Button onClick={triggerFileInput}>Load Project</Button>
-                </div>
-                <SpriteHeightControl height={spriteHeight} onHeightChange={handleSpriteHeightChange} />
-            </div>
-
-            <div className="flex mb-4">
-                <LineColorSelector
-                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors1}
-                    onLineColorChange={handleLineColorChange}
-                    lineNumber={1}
-                    getColorHex={getColorHex}
-                />
-                <LineColorSelector
-                    lineColors={animations[currentAnimation]?.frames[currentFrame]?.lineColors2}
-                    onLineColorChange={handleLineColorChange}
-                    lineNumber={2}
-                    getColorHex={getColorHex}
-                />
-                <div className="border border-gray-300 inline-block bg-white">
-                    {animations[currentAnimation] && animations[currentAnimation].frames[currentFrame] &&
-                        animations[currentAnimation].frames[currentFrame].grid.map((row, rowIndex) => (
-                            <div key={rowIndex} className="flex">
-                                {row.map((cell, colIndex) => (
-                                    <div
-                                        key={`${rowIndex}-${colIndex}`}
-                                        className="w-8 h-6 border border-gray-200 cursor-pointer"
-                                        style={{
-                                            //TODO: what is this control?
-                                            backgroundColor: cell === 1 ?
-                                                getColorHex(animations[currentAnimation].frames[currentFrame].lineColors1[rowIndex]) :
-                                                cell === 2 ?
-                                                    getColorHex(animations[currentAnimation].frames[currentFrame].lineColors2[rowIndex]) :
-                                                    'transparent',
-                                            opacity: cell ? 1 : 0.3
-                                        }}
-                                        onClick={() => handleCellClick(rowIndex, colIndex)}
-                                    />
-                                ))}
-                            </div>
-                        ))}
-                </div>
-                <div className="ml-4">
-                    <h2 className="text-lg font-bold mb-2">Preview</h2>
-                    <canvas ref={canvasRef} className="border border-gray-300" />
-                    <Button className="mt-2" onClick={toggleAnimation}>
-                        {isPlaying ? 'Stop' : 'Play'} Animation
-                    </Button>
-                </div>
-                <div className="ml-4">
-                    <ColorPalette onColorSelect={setCurrentColor} currentColor={currentColor} />
-                </div>
-            </div>
-            <div className="flex items-center space-x-2 mb-4">
-                <Select value={currentAnimation} onValueChange={handleAnimationChange}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select animation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.keys(animations).map(name => (
-                            <SelectItem key={name} value={name}>{name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Input
-                    type="text"
-                    placeholder="New animation name"
-                    value={newAnimationName}
-                    onChange={(e) => setNewAnimationName(e.target.value)}
-                />
-                <Button onClick={addAnimation}>Add Animation</Button>
-                <Button onClick={deleteAnimation} disabled={Object.keys(animations).length <= 1}>Delete Animation</Button>
-            </div>
-            <div className="flex items-center space-x-2 mb-4">
-                <Button onClick={addFrame}>Add Frame</Button>
-                <Button onClick={deleteFrame} disabled={animations[currentAnimation].frames.length === 1}>Delete Frame</Button>
-                <Button onClick={copyFrame}>Copy Frame</Button>
-                <Button onClick={pasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
-                <span className="ml-4">
-                    Frame: {currentFrame + 1} of {animations[currentAnimation] ? animations[currentAnimation].frames.length : 0}
-                </span>
-                <Button onClick={() => setCurrentFrame(Math.max(0, currentFrame - 1))} disabled={currentFrame === 0}>Previous</Button>
-                <Button onClick={() => setCurrentFrame(Math.min(animations[currentAnimation].frames.length - 1, currentFrame + 1))} disabled={currentFrame === animations[currentAnimation].frames.length - 1}>Next</Button>
-            </div>
-            <AnimationSpeedControl
-                speed={animations[currentAnimation].speed}
-                onChange={handleSpeedChange}
+            <HeaderControls
+                characterName={characterName}
+                setCharacterName={setCharacterName}
+                spriteMode={spriteMode}
+                onModeChange={handleModeChange}
+                spriteHeight={spriteHeight}
+                onSpriteHeightChange={handleSpriteHeightChange}
+                onSaveProject={saveProject}
+                onLoadProject={loadProject}
+                animations={animations}
             />
-            <div className="flex items-center space-x-2 mb-4">
-                <Atari2600CodeExporter
+
+            <div className="flex space-x-4">
+                <ColorControls
+                    currentFrame={currentFrame}
+                    currentAnimation={currentAnimation}
                     animations={animations}
-                    characterName={characterName}
-                    spriteHeight={spriteHeight}
-                    withColor={true} />
-                <Atari2600CodeExporter
+                    currentColor={currentColor}
+                    onColorSelect={setCurrentColor}
+                    onLineColorChange={handleLineColorChange}
+                    getColorHex={getColorHex}
+                    spriteMode={spriteMode}
+                />
+
+                <GridEditor
+                    currentFrame={currentFrame}
+                    currentAnimation={currentAnimation}
                     animations={animations}
-                    characterName={characterName}
+                    getColorHex={getColorHex}
+                    onCellClick={handleCellClick}
+                />
+
+                <PreviewCanvas
+                    animations={animations}
+                    currentAnimation={currentAnimation}
+                    currentFrame={currentFrame}
+                    spriteMode={spriteMode}
                     spriteHeight={spriteHeight}
-                    withColor={false} />
+                    isPlaying={isPlaying}
+                    toggleAnimation={toggleAnimation}
+                    getColorHex={getColorHex}
+                />
+            </div>
+
+            <div className="mt-6">
+                <AnimationSelector
+                    animations={animations}
+                    currentAnimation={currentAnimation}
+                    onAnimationChange={handleAnimationChange}
+                    onAddAnimation={handleAddAnimation}
+                    onDeleteAnimation={handleDeleteAnimation}
+                />
+
+                <FrameControls
+                    currentFrame={currentFrame}
+                    totalFrames={animations[currentAnimation]?.frames.length || 0}
+                    onAddFrame={handleAddFrame}
+                    onDeleteFrame={handleDeleteFrame}
+                    onCopyFrame={handleCopyFrame}
+                    onPasteFrame={handlePasteFrame}
+                    onPreviousFrame={handlePreviousFrame}
+                    onNextFrame={handleNextFrame}
+                    copiedFrame={copiedFrame}
+                    animationSpeed={animations[currentAnimation]?.speed || 30}
+                    onSpeedChange={handleSpeedChange}
+                />
             </div>
         </div>
     );

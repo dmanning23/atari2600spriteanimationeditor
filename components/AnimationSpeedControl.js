@@ -1,6 +1,6 @@
 import React from 'react';
-import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
+import { Slider } from '../components/ui/slider';
+import { Input } from '../components/ui/input';
 
 const AnimationSpeedControl = ({ speed, onChange }) => {
     return (
