@@ -10,6 +10,7 @@ import FrameControls from './FrameControls';
 import ColorControls from './ColorControls';
 import GridEditor from './GridEditor';
 import PreviewCanvas from './PreviewCanvas';
+import { Button } from '../components/ui/button';
 
 const DEFAULT_GRID_HEIGHT = 16;
 
@@ -106,6 +107,26 @@ const SpriteAnimationEditor = () => {
             return newAnimations;
         });
     }, [currentAnimation, currentFrame, currentColor, spriteMode]);
+
+    // Add the horizontal flip function
+    const handleFlipHorizontal = useCallback(() => {
+        setAnimations(prevAnimations => {
+            const newAnimations = { ...prevAnimations };
+
+            // Create a deep copy of the current frame
+            const frameToFlip = JSON.parse(
+                JSON.stringify(newAnimations[currentAnimation].frames[currentFrame])
+            );
+
+            // Flip each row in the grid
+            frameToFlip.grid = frameToFlip.grid.map(row => [...row].reverse());
+
+            // Update the frame in the animations object
+            newAnimations[currentAnimation].frames[currentFrame] = frameToFlip;
+
+            return newAnimations;
+        });
+    }, [currentAnimation, currentFrame]);
 
     // Callbacks for header controls
     const handleSpriteHeightChange = useCallback((newHeight) => {
@@ -306,7 +327,7 @@ const SpriteAnimationEditor = () => {
 
     const handleNextFrame = useCallback(() => {
         setCurrentFrame(prev => Math.min(animations[currentAnimation].frames.length - 1, prev + 1));
-    }, [animations, currentAnimation]);
+    }, []);
 
     const handleSpeedChange = useCallback((newSpeed) => {
         setAnimations(prevAnimations => {
@@ -561,6 +582,14 @@ const SpriteAnimationEditor = () => {
                     animationSpeed={animations[currentAnimation]?.speed || 30}
                     onSpeedChange={handleSpeedChange}
                 />
+
+                {/* Add the horizontal flip button */}
+                <div >
+                    <Button
+                        onClick={handleFlipHorizontal}>
+                        Flip Horizontal
+                    </Button>
+                </div>
             </div>
         </div>
     );
