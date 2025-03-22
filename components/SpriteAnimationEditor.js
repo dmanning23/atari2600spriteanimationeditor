@@ -327,7 +327,7 @@ const SpriteAnimationEditor = () => {
 
     const handleNextFrame = useCallback(() => {
         setCurrentFrame(prev => Math.min(animations[currentAnimation].frames.length - 1, prev + 1));
-    }, []);
+    }, [animations, currentAnimation]);
 
     const handleSpeedChange = useCallback((newSpeed) => {
         setAnimations(prevAnimations => {
