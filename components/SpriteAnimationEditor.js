@@ -270,18 +270,10 @@ const SpriteAnimationEditor = () => {
                 }
             ];
 
-            // Set the current frame in the next tick after state update
-            // We know the new frame will be at the end of the array
-            const newFrameIndex = newAnimations[currentAnimation].frames.length - 1;
-
-            // We'll use setTimeout to ensure this runs after state update
-            setTimeout(() => {
-                setCurrentFrame(newFrameIndex);
-            }, 0);
-
             return newAnimations;
         });
-    }, [currentAnimation, spriteHeight, getGridWidth]);
+        setCurrentFrame(animations[currentAnimation].frames.length);
+    }, [currentAnimation, spriteHeight, getGridWidth, animations]);
 
     const handleDeleteFrame = useCallback(() => {
         if (animations[currentAnimation].frames.length > 1) {
