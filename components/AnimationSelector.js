@@ -42,7 +42,7 @@ const AnimationSelector = ({
                     className="w-48"
                 />
 
-                <Button onClick={handleAddAnimation}>Add</Button>
+                <Button variant="outline" onClick={handleAddAnimation}>Add</Button>
                 <Button
                     variant="outline"
                     onClick={onDeleteAnimation}

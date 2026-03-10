@@ -97,7 +97,7 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withCo
 
     return (
         <div>
-            <Button onClick={downloadCode}>
+            <Button variant="outline" onClick={downloadCode}>
                 Export 6502{withColor ? "" : " (no colors)"}
             </Button>
         </div>

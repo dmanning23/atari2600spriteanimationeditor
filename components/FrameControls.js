@@ -20,10 +20,10 @@ const FrameControls = ({
         <div className="space-y-3">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Frames</p>
             <div className="flex items-center gap-2 flex-wrap">
-                <Button onClick={onAddFrame}>Add Frame</Button>
-                <Button onClick={onDeleteFrame} disabled={totalFrames <= 1}>Delete Frame</Button>
-                <Button onClick={onCopyFrame}>Copy Frame</Button>
-                <Button onClick={onPasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
+                <Button variant="outline" onClick={onAddFrame}>Add Frame</Button>
+                <Button variant="outline" onClick={onDeleteFrame} disabled={totalFrames <= 1}>Delete Frame</Button>
+                <Button variant="outline" onClick={onCopyFrame}>Copy Frame</Button>
+                <Button variant="outline" onClick={onPasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
                 <Button variant="outline" onClick={onFlipHorizontal}>Flip Horizontal</Button>
 
                 <span className="mx-2 text-sm text-muted-foreground">

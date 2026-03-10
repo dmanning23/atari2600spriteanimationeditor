@@ -139,7 +139,7 @@ const PreviewCanvas = ({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
             <canvas ref={canvasRef} className="border border-border rounded" style={{ imageRendering: 'pixelated' }} />
             <div className="mt-2 flex items-center gap-2">
-                <Button onClick={toggleAnimation}>
+                <Button variant="outline" onClick={toggleAnimation}>
                     {isPlaying ? 'Stop' : 'Play'} Animation
                 </Button>
                 <label className="flex items-center gap-1 text-sm">
