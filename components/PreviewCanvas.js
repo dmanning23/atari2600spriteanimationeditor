@@ -136,8 +136,8 @@ const PreviewCanvas = ({
 
     return (
         <div className="ml-4">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Preview</p>
-            <canvas ref={canvasRef} className="border border-slate-300 rounded" />
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Preview</p>
+            <canvas ref={canvasRef} className="border border-border rounded" style={{ imageRendering: 'pixelated' }} />
             <div className="mt-2 flex items-center gap-2">
                 <Button onClick={toggleAnimation}>
                     {isPlaying ? 'Stop' : 'Play'} Animation

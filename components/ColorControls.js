@@ -21,7 +21,7 @@ const ColorControls = ({
     return (
         <div className="flex gap-3">
             <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Palette</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Palette</p>
                 <ColorPalette
                     onColorSelect={onColorSelect}
                     currentColor={currentColor}
@@ -29,7 +29,7 @@ const ColorControls = ({
             </div>
 
             <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">C1</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">C1</p>
                 <LineColorSelector
                     lineColors={frame.lineColors1}
                     onLineColorChange={onLineColorChange}
@@ -40,7 +40,7 @@ const ColorControls = ({
 
             {spriteMode === 'doubleColor' && (
                 <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">C2</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">C2</p>
                     <LineColorSelector
                         lineColors={frame.lineColors2}
                         onLineColorChange={onLineColorChange}

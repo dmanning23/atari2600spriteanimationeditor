@@ -10,7 +10,6 @@ import FrameControls from './FrameControls';
 import ColorControls from './ColorControls';
 import GridEditor from './GridEditor';
 import PreviewCanvas from './PreviewCanvas';
-import { Button } from '../components/ui/button';
 
 const DEFAULT_GRID_HEIGHT = 16;
 
@@ -507,7 +506,7 @@ const SpriteAnimationEditor = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-100 p-6">
+        <div className="min-h-screen bg-background p-6">
 
             <HeaderControls
                 characterName={characterName}
@@ -521,7 +520,7 @@ const SpriteAnimationEditor = () => {
                 animations={animations}
             />
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div className="bg-card rounded border border-border panel-glow p-4">
                 <div className="flex gap-6">
                     <ColorControls
                         currentFrame={currentFrame}
@@ -557,7 +556,7 @@ const SpriteAnimationEditor = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mt-4">
+            <div className="bg-card rounded border border-border panel-glow p-4 mt-4">
                 <AnimationSelector
                     animations={animations}
                     currentAnimation={currentAnimation}

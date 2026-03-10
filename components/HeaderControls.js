@@ -23,9 +23,11 @@ const HeaderControls = ({
     };
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+        <div className="bg-card rounded border border-border panel-glow p-4 mb-4">
             <div className="flex items-center justify-between gap-6 flex-wrap">
-                <h1 className="text-xl font-bold text-slate-800 whitespace-nowrap">Atari 2600 Sprite Editor</h1>
+                <h1 className="pixel-font title-glow text-primary whitespace-nowrap" style={{ fontSize: '11px', lineHeight: '1.6' }}>
+                    Atari 2600<br />Sprite Editor
+                </h1>
 
                 <Input
                     id="character-name"

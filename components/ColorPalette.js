@@ -19,7 +19,7 @@ const ColorPalette = ({ onColorSelect, currentColor }) => {
             {colorPaletteData.palette.map((color) => (
                 <Button
                     key={color.code}
-                    className={`p-0 ${currentColor === color.code ? 'ring-1 ring-offset-1 ring-black' : ''}`}
+                    className={`p-0 ${currentColor === color.code ? 'ring-2 ring-offset-1 ring-primary ring-offset-card' : ''}`}
                     style={{
                         backgroundColor: getColorHex(color.code),
                         width: '20px',

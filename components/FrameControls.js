@@ -18,7 +18,7 @@ const FrameControls = ({
 }) => {
     return (
         <div className="space-y-3">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Frames</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Frames</p>
             <div className="flex items-center gap-2 flex-wrap">
                 <Button onClick={onAddFrame}>Add Frame</Button>
                 <Button onClick={onDeleteFrame} disabled={totalFrames <= 1}>Delete Frame</Button>
@@ -26,7 +26,7 @@ const FrameControls = ({
                 <Button onClick={onPasteFrame} disabled={!copiedFrame}>Paste Frame</Button>
                 <Button variant="outline" onClick={onFlipHorizontal}>Flip Horizontal</Button>
 
-                <span className="mx-2 text-sm text-slate-600">
+                <span className="mx-2 text-sm text-muted-foreground">
                     Frame {currentFrame + 1} of {totalFrames}
                 </span>
 

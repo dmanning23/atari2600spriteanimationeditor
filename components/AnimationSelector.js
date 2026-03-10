@@ -21,7 +21,7 @@ const AnimationSelector = ({
 
     return (
         <div className="mb-4 space-y-2">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Animations</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Animations</p>
             <div className="flex items-center gap-2 flex-wrap">
                 <Select value={currentAnimation} onValueChange={onAnimationChange}>
                     <SelectTrigger className="w-[180px]">

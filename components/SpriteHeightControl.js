@@ -6,7 +6,7 @@ const SpriteHeightControl = ({ height, onHeightChange }) => {
 
     return (
         <div className="flex items-center space-x-2">
-            <span>Sprite Height:</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wide">Height:</span>
             <Select value={height.toString()} onValueChange={(value) => onHeightChange(Number(value))}>
                 <SelectTrigger className="w-[100px]">
                     <SelectValue placeholder="Height" />

@@ -10,7 +10,7 @@ const LineColorSelector = ({ lineColors, onLineColorChange, lineNumber, getColor
             {lineColors && lineColors.map((color, index) => (
                 <div
                     key={index}
-                    className="w-5 h-5 border border-gray-300 cursor-pointer mb-[0px]"
+                    className="w-5 h-5 border border-border cursor-pointer mb-[0px]"
                     style={{
                         backgroundColor: color !== undefined ? getColorHex(color) : 'transparent'
                     }}
