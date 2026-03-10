@@ -136,8 +136,8 @@ const PreviewCanvas = ({
 
     return (
         <div className="ml-4">
-            <h2 className="text-lg font-bold mb-2">Preview</h2>
-            <canvas ref={canvasRef} className="border border-gray-300" />
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Preview</p>
+            <canvas ref={canvasRef} className="border border-slate-300 rounded" />
             <div className="mt-2 flex items-center gap-2">
                 <Button onClick={toggleAnimation}>
                     {isPlaying ? 'Stop' : 'Play'} Animation

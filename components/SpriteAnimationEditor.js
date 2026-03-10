@@ -507,7 +507,7 @@ const SpriteAnimationEditor = () => {
     }, []);
 
     return (
-        <div className="p-4 bg-gray-100">
+        <div className="min-h-screen bg-slate-100 p-6">
 
             <HeaderControls
                 characterName={characterName}
@@ -521,41 +521,43 @@ const SpriteAnimationEditor = () => {
                 animations={animations}
             />
 
-            <div className="flex space-x-4">
-                <ColorControls
-                    currentFrame={currentFrame}
-                    currentAnimation={currentAnimation}
-                    animations={animations}
-                    currentColor={currentColor}
-                    onColorSelect={setCurrentColor}
-                    onLineColorChange={handleLineColorChange}
-                    getColorHex={getColorHex}
-                    spriteMode={spriteMode}
-                />
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                <div className="flex gap-6">
+                    <ColorControls
+                        currentFrame={currentFrame}
+                        currentAnimation={currentAnimation}
+                        animations={animations}
+                        currentColor={currentColor}
+                        onColorSelect={setCurrentColor}
+                        onLineColorChange={handleLineColorChange}
+                        getColorHex={getColorHex}
+                        spriteMode={spriteMode}
+                    />
 
-                <GridEditor
-                    currentFrame={currentFrame}
-                    currentAnimation={currentAnimation}
-                    animations={animations}
-                    getColorHex={getColorHex}
-                    onCellClick={handleCellClick}
-                />
+                    <GridEditor
+                        currentFrame={currentFrame}
+                        currentAnimation={currentAnimation}
+                        animations={animations}
+                        getColorHex={getColorHex}
+                        onCellClick={handleCellClick}
+                    />
 
-                <PreviewCanvas
-                    animations={animations}
-                    currentAnimation={currentAnimation}
-                    currentFrame={currentFrame}
-                    spriteMode={spriteMode}
-                    spriteHeight={spriteHeight}
-                    isPlaying={isPlaying}
-                    toggleAnimation={toggleAnimation}
-                    getColorHex={getColorHex}
-                    previewBgColor={previewBgColor}
-                    setPreviewBgColor={setPreviewBgColor}
-                />
+                    <PreviewCanvas
+                        animations={animations}
+                        currentAnimation={currentAnimation}
+                        currentFrame={currentFrame}
+                        spriteMode={spriteMode}
+                        spriteHeight={spriteHeight}
+                        isPlaying={isPlaying}
+                        toggleAnimation={toggleAnimation}
+                        getColorHex={getColorHex}
+                        previewBgColor={previewBgColor}
+                        setPreviewBgColor={setPreviewBgColor}
+                    />
+                </div>
             </div>
 
-            <div className="mt-6">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mt-4">
                 <AnimationSelector
                     animations={animations}
                     currentAnimation={currentAnimation}
@@ -576,15 +578,8 @@ const SpriteAnimationEditor = () => {
                     copiedFrame={copiedFrame}
                     animationSpeed={animations[currentAnimation]?.speed || 30}
                     onSpeedChange={handleSpeedChange}
+                    onFlipHorizontal={handleFlipHorizontal}
                 />
-
-                {/* Add the horizontal flip button */}
-                <div >
-                    <Button
-                        onClick={handleFlipHorizontal}>
-                        Flip Horizontal
-                    </Button>
-                </div>
             </div>
         </div>
     );

@@ -19,28 +19,35 @@ const ColorControls = ({
     const frame = animations[currentAnimation].frames[currentFrame];
 
     return (
-        <div className="flex mb-4 space-x-4">
+        <div className="flex gap-3">
             <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Palette</p>
                 <ColorPalette
                     onColorSelect={onColorSelect}
                     currentColor={currentColor}
                 />
             </div>
 
-            <LineColorSelector
-                lineColors={frame.lineColors1}
-                onLineColorChange={onLineColorChange}
-                lineNumber={1}
-                getColorHex={getColorHex}
-            />
-
-            {spriteMode === 'doubleColor' && (
+            <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">C1</p>
                 <LineColorSelector
-                    lineColors={frame.lineColors2}
+                    lineColors={frame.lineColors1}
                     onLineColorChange={onLineColorChange}
-                    lineNumber={2}
+                    lineNumber={1}
                     getColorHex={getColorHex}
                 />
+            </div>
+
+            {spriteMode === 'doubleColor' && (
+                <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">C2</p>
+                    <LineColorSelector
+                        lineColors={frame.lineColors2}
+                        onLineColorChange={onLineColorChange}
+                        lineNumber={2}
+                        getColorHex={getColorHex}
+                    />
+                </div>
             )}
         </div>
     );

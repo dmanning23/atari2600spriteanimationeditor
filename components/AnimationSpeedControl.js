@@ -4,7 +4,7 @@ import { Input } from '../components/ui/input';
 
 const AnimationSpeedControl = ({ speed, onChange }) => {
     return (
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center space-x-2">
             <span>Animation Speed (1/60th second delay):</span>
             <Slider
                 min={0}

@@ -23,28 +23,22 @@ const HeaderControls = ({
     };
 
     return (
-        <div className="mb-4 space-y-4">
-            <h1 className="text-2xl font-bold">Atari 2600 Sprite Animation Editor</h1>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+            <div className="flex items-center justify-between gap-6 flex-wrap">
+                <h1 className="text-xl font-bold text-slate-800 whitespace-nowrap">Atari 2600 Sprite Editor</h1>
 
-            <div>
-                <label htmlFor="character-name" className="block text-sm font-medium text-gray-700">
-                    Character Name
-                </label>
                 <Input
                     id="character-name"
                     type="text"
                     value={characterName}
                     onChange={(e) => setCharacterName(e.target.value)}
-                    placeholder="Enter character name"
-                    className="mt-1"
+                    placeholder="Character name"
+                    className="w-48"
                 />
-            </div>
 
-            <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                    <Button onClick={triggerFileInput}>Load Project</Button>
-
-                    <Button onClick={onSaveProject}>Save Project</Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={triggerFileInput}>Load</Button>
+                    <Button variant="outline" onClick={onSaveProject}>Save</Button>
                     <input
                         type="file"
                         accept=".json"
@@ -52,8 +46,6 @@ const HeaderControls = ({
                         style={{ display: 'none' }}
                         ref={fileInputRef}
                     />
-
-                    {/* Export buttons */}
                     <Atari2600CodeExporter
                         animations={animations}
                         characterName={characterName}
@@ -70,7 +62,7 @@ const HeaderControls = ({
                     />
                 </div>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-4">
                     <ModeSelector mode={spriteMode} onModeChange={onModeChange} />
                     <SpriteHeightControl height={spriteHeight} onHeightChange={onSpriteHeightChange} />
                 </div>

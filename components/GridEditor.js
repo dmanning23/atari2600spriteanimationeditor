@@ -15,7 +15,9 @@ const GridEditor = ({
 
     // We don't need to compute gridWidth here - we should use exactly what's in the frame
     return (
-        <div className="border border-gray-300 inline-block bg-white">
+        <div>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Canvas</p>
+        <div className="border border-slate-300 inline-block bg-white rounded">
             {frame.grid.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                     {row.map((cell, colIndex) => (
@@ -35,6 +37,7 @@ const GridEditor = ({
                     ))}
                 </div>
             ))}
+        </div>
         </div>
     );
 };

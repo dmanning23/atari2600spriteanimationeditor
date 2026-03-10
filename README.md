@@ -12,7 +12,7 @@ A browser-based tool for creating and editing character sprite animations for At
 - **Frame editing** — add, delete, copy, paste, and navigate frames
 - **Per-row color assignment** — set Atari 2600 palette colors per scanline
 - **Horizontal flip** — mirror the current frame
-- **Animated preview** — play back animations at adjustable speed
+- **Animated preview** — play back animations at adjustable speed with a configurable background color
 - **Atari 2600 code export** — generate assembly-ready sprite data
 - **Save/load projects** — JSON project files for round-trip editing
 
@@ -24,6 +24,14 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Debugging in VS Code
+
+A `.vscode/launch.json` is included with three debug configurations:
+
+- **Next.js: debug server-side** — starts the dev server in a Node terminal for server-side breakpoints
+- **Next.js: debug client-side** — attaches Chrome DevTools to `localhost:3000` (dev server must already be running)
+- **Next.js: debug full stack** — starts the dev server and automatically opens Chrome for client-side debugging
 
 ## Tech Stack
 

@@ -8,7 +8,7 @@ const ModeSelector = ({ mode, onModeChange }) => {
     ];
 
     return (
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center space-x-2">
             <span>Sprite Mode:</span>
             <Select value={mode} onValueChange={onModeChange}>
                 <SelectTrigger className="w-[200px]">

@@ -20,33 +20,37 @@ const AnimationSelector = ({
     };
 
     return (
-        <div className="flex items-center space-x-2 mb-4">
-            <Select value={currentAnimation} onValueChange={onAnimationChange}>
-                <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select animation" />
-                </SelectTrigger>
-                <SelectContent>
-                    {Object.keys(animations).map(name => (
-                        <SelectItem key={name} value={name}>{name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+        <div className="mb-4 space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Animations</p>
+            <div className="flex items-center gap-2 flex-wrap">
+                <Select value={currentAnimation} onValueChange={onAnimationChange}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select animation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {Object.keys(animations).map(name => (
+                            <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
-            <Input
-                type="text"
-                placeholder="New animation name"
-                value={newAnimationName}
-                onChange={(e) => setNewAnimationName(e.target.value)}
-            />
+                <Input
+                    type="text"
+                    placeholder="New animation name"
+                    value={newAnimationName}
+                    onChange={(e) => setNewAnimationName(e.target.value)}
+                    className="w-48"
+                />
 
-            <Button onClick={handleAddAnimation}>Add Animation</Button>
-
-            <Button
-                onClick={onDeleteAnimation}
-                disabled={Object.keys(animations).length <= 1}
-            >
-                Delete Animation
-            </Button>
+                <Button onClick={handleAddAnimation}>Add</Button>
+                <Button
+                    variant="outline"
+                    onClick={onDeleteAnimation}
+                    disabled={Object.keys(animations).length <= 1}
+                >
+                    Delete
+                </Button>
+            </div>
         </div>
     );
 };

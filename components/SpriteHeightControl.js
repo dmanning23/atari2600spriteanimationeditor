@@ -5,7 +5,7 @@ const SpriteHeightControl = ({ height, onHeightChange }) => {
     const possibleHeights = [4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32];
 
     return (
-        <div className="flex items-center space-x-2 mb-4">
+        <div className="flex items-center space-x-2">
             <span>Sprite Height:</span>
             <Select value={height.toString()} onValueChange={(value) => onHeightChange(Number(value))}>
                 <SelectTrigger className="w-[100px]">
