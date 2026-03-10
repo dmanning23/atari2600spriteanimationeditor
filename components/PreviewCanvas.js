@@ -12,7 +12,9 @@ const PreviewCanvas = ({
     spriteHeight,
     isPlaying,
     toggleAnimation,
-    getColorHex
+    getColorHex,
+    previewBgColor,
+    setPreviewBgColor
 }) => {
     const canvasRef = useRef(null);
     const animationRef = useRef(null);
@@ -37,9 +39,14 @@ const PreviewCanvas = ({
         let lastFrameTime = 0;
         const frameDuration = (animations[currentAnimation].speed / ATARI_REFRESH_RATE) * 1000; // Convert to milliseconds
 
+        const fillBackground = () => {
+            ctx.fillStyle = previewBgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        };
+
         const animate = (currentTime) => {
             if (currentTime - lastFrameTime >= frameDuration) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                fillBackground();
                 const currentAnimationFrames = animations[currentAnimation].frames;
                 if (currentAnimationFrames && currentAnimationFrames.length > 0) {
                     const frame = currentAnimationFrames[frameIndex];
@@ -81,7 +88,7 @@ const PreviewCanvas = ({
                 cancelAnimationFrame(animationRef.current);
             }
             // Render the current frame when stopped
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fillBackground();
             const currentAnimationFrames = animations[currentAnimation].frames;
             if (currentAnimationFrames && currentAnimationFrames.length > 0) {
                 const frame = currentAnimationFrames[currentFrame];
@@ -123,16 +130,29 @@ const PreviewCanvas = ({
         spriteMode,
         spriteHeight,
         getColorHex,
-        getGridWidth
+        getGridWidth,
+        previewBgColor
     ]);
 
     return (
         <div className="ml-4">
             <h2 className="text-lg font-bold mb-2">Preview</h2>
             <canvas ref={canvasRef} className="border border-gray-300" />
-            <Button className="mt-2" onClick={toggleAnimation}>
-                {isPlaying ? 'Stop' : 'Play'} Animation
-            </Button>
+            <div className="mt-2 flex items-center gap-2">
+                <Button onClick={toggleAnimation}>
+                    {isPlaying ? 'Stop' : 'Play'} Animation
+                </Button>
+                <label className="flex items-center gap-1 text-sm">
+                    BG
+                    <input
+                        type="color"
+                        value={previewBgColor}
+                        onChange={e => setPreviewBgColor(e.target.value)}
+                        className="w-8 h-8 cursor-pointer rounded border border-gray-300 p-0.5"
+                        title="Preview background color"
+                    />
+                </label>
+            </div>
         </div>
     );
 };

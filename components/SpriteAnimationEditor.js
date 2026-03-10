@@ -33,6 +33,7 @@ const SpriteAnimationEditor = () => {
     const [currentColor, setCurrentColor] = useState('$0E'); // Default to white
     const [copiedFrame, setCopiedFrame] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [previewBgColor, setPreviewBgColor] = useState('#000000');
 
     // Function to determine grid width based on mode
     function getGridWidth() {
@@ -549,6 +550,8 @@ const SpriteAnimationEditor = () => {
                     isPlaying={isPlaying}
                     toggleAnimation={toggleAnimation}
                     getColorHex={getColorHex}
+                    previewBgColor={previewBgColor}
+                    setPreviewBgColor={setPreviewBgColor}
                 />
             </div>
 
