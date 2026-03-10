@@ -21,8 +21,8 @@ const SpriteAnimationEditor = () => {
         'Default': {
             frames: [{
                 grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
-                lineColors1: Array(spriteHeight).fill('$00'),
-                lineColors2: Array(spriteHeight).fill('$00')
+                lineColors1: Array(spriteHeight).fill('$0E'),
+                lineColors2: Array(spriteHeight).fill('$0E')
             }],
             speed: 30
         }
@@ -146,8 +146,8 @@ const SpriteAnimationEditor = () => {
                 while (newAnimations[name].frames[0].grid.length < newHeight) {
                     newAnimations[name].frames.forEach(frame => {
                         frame.grid.push(Array(getGridWidth()).fill(0));
-                        frame.lineColors1.push('$00');
-                        frame.lineColors2.push('$00');
+                        frame.lineColors1.push('$0E');
+                        frame.lineColors2.push('$0E');
                     });
                 }
             });
@@ -234,8 +234,8 @@ const SpriteAnimationEditor = () => {
             [newAnimationName]: {
                 frames: [{
                     grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
-                    lineColors1: Array(spriteHeight).fill('$00'),
-                    lineColors2: Array(spriteHeight).fill('$00'),
+                    lineColors1: Array(spriteHeight).fill('$0E'),
+                    lineColors2: Array(spriteHeight).fill('$0E'),
                 }],
                 speed: 30
             }
@@ -265,8 +265,8 @@ const SpriteAnimationEditor = () => {
                 ...newAnimations[currentAnimation].frames,
                 {
                     grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
-                    lineColors1: Array(spriteHeight).fill('$00'),
-                    lineColors2: Array(spriteHeight).fill('$00'),
+                    lineColors1: Array(spriteHeight).fill('$0E'),
+                    lineColors2: Array(spriteHeight).fill('$0E'),
                 }
             ];
 
