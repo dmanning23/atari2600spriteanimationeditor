@@ -69,6 +69,12 @@ const PreviewCanvas = ({
                                     ctx.fillStyle = getColorHex(colorCode);
                                     ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                                 }
+                            } else if (spriteMode === 'normal') {
+                                if (cell === 1) {
+                                    const colorCode = frame.lineColors1[y];
+                                    ctx.fillStyle = getColorHex(colorCode);
+                                    ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                                }
                             }
                         });
                     });
@@ -106,6 +112,12 @@ const PreviewCanvas = ({
                                 ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
                             }
                         } else if (spriteMode === 'doubleWidth') {
+                            if (cell === 1) {
+                                const colorCode = frame.lineColors1[y];
+                                ctx.fillStyle = getColorHex(colorCode);
+                                ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                            }
+                        } else if (spriteMode === 'normal') {
                             if (cell === 1) {
                                 const colorCode = frame.lineColors1[y];
                                 ctx.fillStyle = getColorHex(colorCode);
