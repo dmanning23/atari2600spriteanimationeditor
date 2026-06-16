@@ -162,56 +162,23 @@ const SpriteAnimationEditor = () => {
     const handleModeChange = useCallback((newMode) => {
         setSpriteMode(newMode);
 
-        // If changing from doubleColor to doubleWidth
+        // doubleColor → doubleWidth: extend rows 8→16, collapse color2 pixels to on
         if (spriteMode === 'doubleColor' && newMode === 'doubleWidth') {
-            // Convert existing animations to double width format
             setAnimations(prevAnimations => {
                 const newAnimations = { ...prevAnimations };
-
                 Object.keys(newAnimations).forEach(animName => {
                     newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
-                        // Create a new grid with width 16
                         const newGrid = Array(frame.grid.length).fill().map((_, rowIndex) => {
                             const oldRow = frame.grid[rowIndex];
-                            // Extend each row to 16 cells, initialized with 0
                             return [...oldRow, ...Array(8).fill(0)];
                         });
-
-                        // In the conversion, we'll treat color1 and color2 as filled positions
-                        // but only use color1 in the new format
                         for (let i = 0; i < frame.grid.length; i++) {
                             for (let j = 0; j < 8; j++) {
-                                if (frame.grid[i][j] === 2) { // If was color2
-                                    newGrid[i][j] = 1; // Convert to filled in doubleWidth
+                                if (frame.grid[i][j] === 2) {
+                                    newGrid[i][j] = 1;
                                 }
                             }
                         }
-
-                        return {
-                            grid: newGrid,
-                            lineColors1: [...frame.lineColors1], // Keep color1
-                            lineColors2: [...frame.lineColors2]  // Keep color2 for potential conversion back
-                        };
-                    });
-                });
-
-                return newAnimations;
-            });
-        }
-        // If changing from doubleWidth to doubleColor
-        else if (spriteMode === 'doubleWidth' && newMode === 'doubleColor') {
-            // Convert existing animations back to double color format
-            setAnimations(prevAnimations => {
-                const newAnimations = { ...prevAnimations };
-
-                Object.keys(newAnimations).forEach(animName => {
-                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
-                        // Create a new grid with width 8
-                        const newGrid = Array(frame.grid.length).fill().map((_, rowIndex) => {
-                            // Keep only the first 8 cells from each row
-                            return frame.grid[rowIndex].slice(0, 8);
-                        });
-
                         return {
                             grid: newGrid,
                             lineColors1: [...frame.lineColors1],
@@ -219,10 +186,80 @@ const SpriteAnimationEditor = () => {
                         };
                     });
                 });
-
                 return newAnimations;
             });
         }
+        // doubleWidth → doubleColor: trim rows 16→8
+        else if (spriteMode === 'doubleWidth' && newMode === 'doubleColor') {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        const newGrid = frame.grid.map(row => row.slice(0, 8));
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1],
+                            lineColors2: [...frame.lineColors2]
+                        };
+                    });
+                });
+                return newAnimations;
+            });
+        }
+        // doubleColor → normal: collapse color2 pixels (2→1), grid stays 8px
+        else if (spriteMode === 'doubleColor' && newMode === 'normal') {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        const newGrid = frame.grid.map(row =>
+                            row.map(cell => (cell === 2 ? 1 : cell))
+                        );
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1],
+                            lineColors2: [...frame.lineColors2]
+                        };
+                    });
+                });
+                return newAnimations;
+            });
+        }
+        // doubleWidth → normal: trim rows 16→8
+        else if (spriteMode === 'doubleWidth' && newMode === 'normal') {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        const newGrid = frame.grid.map(row => row.slice(0, 8));
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1],
+                            lineColors2: [...frame.lineColors2]
+                        };
+                    });
+                });
+                return newAnimations;
+            });
+        }
+        // normal → doubleWidth: extend rows 8→16
+        else if (spriteMode === 'normal' && newMode === 'doubleWidth') {
+            setAnimations(prevAnimations => {
+                const newAnimations = { ...prevAnimations };
+                Object.keys(newAnimations).forEach(animName => {
+                    newAnimations[animName].frames = newAnimations[animName].frames.map(frame => {
+                        const newGrid = frame.grid.map(row => [...row, ...Array(8).fill(0)]);
+                        return {
+                            grid: newGrid,
+                            lineColors1: [...frame.lineColors1],
+                            lineColors2: [...frame.lineColors2]
+                        };
+                    });
+                });
+                return newAnimations;
+            });
+        }
+        // normal → doubleColor: no-op (0/1 values are valid in doubleColor)
     }, [spriteMode]);
 
     // Callbacks for animation selector
