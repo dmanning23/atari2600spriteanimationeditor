@@ -468,8 +468,10 @@ const SpriteAnimationEditor = () => {
                             }
 
                             // For double color mode validate values are 0, 1, or 2
-                            // For double width mode validate values are 0 or 1
-                            const validValues = loadedProject.spriteMode === 'doubleWidth' ? [0, 1] : [0, 1, 2];
+                            // For double width and normal modes validate values are 0 or 1
+                            const validValues = (loadedProject.spriteMode === 'doubleWidth' || loadedProject.spriteMode === 'normal')
+                                ? [0, 1]
+                                : [0, 1, 2];
 
                             // Validate each row has same width and contains only valid values
                             frame.grid.forEach((row, rowIndex) => {
@@ -522,7 +524,10 @@ const SpriteAnimationEditor = () => {
                     : 'Untitled Character';
 
                 // Set sprite mode (default to doubleColor if not specified in project)
-                const spriteMode = loadedProject.spriteMode === 'doubleWidth' ? 'doubleWidth' : 'doubleColor';
+                const validModes = ['doubleColor', 'doubleWidth', 'normal'];
+                const spriteMode = validModes.includes(loadedProject.spriteMode)
+                    ? loadedProject.spriteMode
+                    : 'doubleColor';
 
                 // Update state only after all validations pass
                 setSpriteHeight(loadedProject.spriteHeight);
