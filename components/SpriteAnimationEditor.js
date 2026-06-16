@@ -301,22 +301,22 @@ const SpriteAnimationEditor = () => {
     }, [animations, currentAnimation]);
 
     const handleAddFrame = useCallback(() => {
-        setAnimations(prevAnimations => {
-            const newAnimations = { ...prevAnimations };
-
-            // Add the new frame
-            newAnimations[currentAnimation].frames = [
-                ...newAnimations[currentAnimation].frames,
-                {
-                    grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
-                    lineColors1: Array(spriteHeight).fill('$0E'),
-                    lineColors2: Array(spriteHeight).fill('$0E'),
-                }
-            ];
-
-            return newAnimations;
-        });
-        setCurrentFrame(animations[currentAnimation].frames.length);
+        const newFrameIndex = animations[currentAnimation].frames.length;
+        setAnimations(prevAnimations => ({
+            ...prevAnimations,
+            [currentAnimation]: {
+                ...prevAnimations[currentAnimation],
+                frames: [
+                    ...prevAnimations[currentAnimation].frames,
+                    {
+                        grid: Array(spriteHeight).fill().map(() => Array(getGridWidth()).fill(0)),
+                        lineColors1: Array(spriteHeight).fill('$0E'),
+                        lineColors2: Array(spriteHeight).fill('$0E'),
+                    }
+                ]
+            }
+        }));
+        setCurrentFrame(newFrameIndex);
     }, [currentAnimation, spriteHeight, getGridWidth, animations]);
 
     const handleDeleteFrame = useCallback(() => {
