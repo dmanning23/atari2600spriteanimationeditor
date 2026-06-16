@@ -260,6 +260,9 @@ const SpriteAnimationEditor = () => {
             });
         }
         // normal → doubleColor: no-op (0/1 values are valid in doubleColor)
+        else if (spriteMode === 'normal' && newMode === 'doubleColor') {
+            // Grid values (0/1) are already valid in doubleColor; no transformation needed
+        }
     }, [spriteMode]);
 
     // Callbacks for animation selector
