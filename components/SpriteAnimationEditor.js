@@ -85,6 +85,10 @@ const SpriteAnimationEditor = () => {
                 // In double width mode, toggle between 0 and 1
                 newAnimations[currentAnimation].frames[currentFrame].grid[row][col] =
                     currentCellValue === 0 ? 1 : 0;
+            } else if (spriteMode === 'normal') {
+                // In normal mode, toggle between 0 and 1
+                newAnimations[currentAnimation].frames[currentFrame].grid[row][col] =
+                    currentCellValue === 0 ? 1 : 0;
             }
 
             return newAnimations;
