@@ -13,7 +13,6 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withCo
                     code += `${characterName}${animationName}${frameIndex + 1}1\n`;
                     for (let i = spriteHeight - 1; i >= 0; i--) {
                         const row = frame.grid[i];
-                        // First byte (leftmost 8 pixels)
                         const leftByte = row.slice(0, 8).reduce((acc, cell, index) =>
                             acc | (cell !== 0 ? (1 << (7 - index)) : 0), 0);
                         code += `  .byte %${leftByte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i} (left)\n`;
@@ -23,7 +22,6 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withCo
                     code += `${characterName}${animationName}${frameIndex + 1}2\n`;
                     for (let i = spriteHeight - 1; i >= 0; i--) {
                         const row = frame.grid[i];
-                        // Second byte (rightmost 8 pixels)
                         const rightByte = row.slice(8, 16).reduce((acc, cell, index) =>
                             acc | (cell !== 0 ? (1 << (7 - index)) : 0), 0);
                         code += `  .byte %${rightByte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i} (right)\n`;
@@ -38,8 +36,26 @@ const Atari2600CodeExporter = ({ animations, characterName, spriteHeight, withCo
                         }
                         code += '\n';
                     }
+                } else if (mode === 'normal') {
+                    code += `${characterName}${animationName}${frameIndex + 1}\n`;
+                    for (let i = spriteHeight - 1; i >= 0; i--) {
+                        const row = frame.grid[i];
+                        const byte = row.reduce((acc, cell, index) =>
+                            acc | (cell !== 0 ? (1 << (7 - index)) : 0), 0);
+                        code += `  .byte %${byte.toString(2).padStart(8, '0')} ; Row ${spriteHeight - i}\n`;
+                    }
+                    code += '\n';
+
+                    if (withColor) {
+                        code += `${characterName}${animationName}Color${frameIndex + 1}\n`;
+                        for (let i = spriteHeight - 1; i >= 0; i--) {
+                            const color = frame.lineColors1[i];
+                            code += `  .byte ${color} ; Row ${spriteHeight - i}\n`;
+                        }
+                        code += '\n';
+                    }
                 } else {
-                    // Original double-color mode
+                    // doubleColor mode
                     code += `${characterName}${animationName}${frameIndex + 1}1\n`;
                     for (let i = spriteHeight - 1; i >= 0; i--) {
                         const row = frame.grid[i];
