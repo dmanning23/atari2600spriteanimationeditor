@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 const ModeSelector = ({ mode, onModeChange }) => {
     const modes = [
+        { id: 'normal', label: 'Normal (P0 only)' },
         { id: 'doubleColor', label: 'Double Color (P0, P1)' },
         { id: 'doubleWidth', label: 'Double Width (16px)' }
     ];
